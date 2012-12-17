@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
 import org.vaadin.artur.icepush.ICEPush;
 
 import com.google.common.collect.Multimap;
@@ -79,7 +78,7 @@ public class WelcomeScreen extends Application implements Observer,
 	private static final String THEME = "custom";
 
 	private Window window = new Window(
-			"IntelliCloudBench - Intelligent Cloud Service Benchmarking",
+			"Ballon Race Ride - Intelligent Cloud Service Benchmarking",
 			new VerticalLayout());
 	private ICEPush pusher;
 
@@ -92,10 +91,12 @@ public class WelcomeScreen extends Application implements Observer,
 
 	private Panel panel;
 
+
 	private ClickListener nextListener = new ClickListener() {
 
 		@Override
 		public void buttonClick(ClickEvent event) {
+			
 			saveState();
 
 			UIState uiState = user.getUiState();
@@ -333,6 +334,7 @@ public class WelcomeScreen extends Application implements Observer,
 
 					@Override
 					public void buttonClick(ClickEvent event) {
+						
 						if (handler == null) {
 							handler = new OAuthHandler(WelcomeScreen.this,
 									WelcomeScreen.this.window.getURL()

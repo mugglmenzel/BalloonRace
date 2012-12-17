@@ -31,7 +31,6 @@
 package edu.kit.aifb.IntelliCloudBench.util;
 
 import java.util.Map;
-
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.GoogleApi20;
 import org.scribe.model.OAuthRequest;
@@ -57,25 +56,22 @@ public class OAuthHandler implements ParameterHandler {
 	private static final String VERIFIER_NAME = "code";
 	private static final String GRANT_TYPE = "authorization_code";
 	private static final String GET_PROFILE_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
-
-	private OAuthService service;
+	
 	private User user;
 	private IOAuthListener listener;
+	private String callbackUrl;
 
 	public OAuthHandler(IOAuthListener listener, String callbackUrl) {
 		
 
-		String apiKey = "468842765661-6h31fuui4vgmvd170k6qgl6vc080qs6r.apps.googleusercontent.com";
-		String apiSecret = "5sS6JWoF1plpGVAIvXc44xcK";
-
+		this.callbackUrl = callbackUrl;
 		this.listener = listener;
-		this.service =
-		    new ServiceBuilder().provider(GoogleApi20.class).apiKey(apiKey).apiSecret(apiSecret).scope(OAuthHandler.SCOPE)
-		        .grantType(OAuthHandler.GRANT_TYPE).callback(callbackUrl).build();
+		   
 	}
 
+
 	public String getRedirectUrl() {
-		return service.getAuthorizationUrl(OAuthHandler.EMPTY_TOKEN);
+		return getService().getAuthorizationUrl(OAuthHandler.EMPTY_TOKEN);
 	}
 
 	@Override
@@ -87,13 +83,16 @@ public class OAuthHandler implements ParameterHandler {
 				 * User logged in via Provider, now get Access Token from response
 				 */
 				Verifier verifier = new Verifier(parameters.get(OAuthHandler.VERIFIER_NAME)[0]);
-				Token accessToken = service.getAccessToken(null, verifier);
+				Token accessToken = getService().getAccessToken(null, verifier);
 
 				/* and request User info */
 				OAuthRequest userRequest = new OAuthRequest(Verb.GET, OAuthHandler.GET_PROFILE_URL);
-				service.signRequest(accessToken, userRequest);
+				getService().signRequest(accessToken, userRequest);
 				userRequest.addHeader("GData-Version", "3.0");
 				Response userResponse = userRequest.send();
+
+				listener.setErrorMessage("Requested user info from google: "
+						+ userResponse.getBody());
 
 				/* Retrieve user info from JSON response */
 				if (userResponse.getBody() != null) {
@@ -123,5 +122,15 @@ public class OAuthHandler implements ParameterHandler {
 		} catch (Exception e) {
 			listener.setErrorMessage(e.getMessage());
 		}
+	}
+	private OAuthService getService(){
+
+//		String apiKey = "468842765661-6h31fuui4vgmvd170k6qgl6vc080qs6r.apps.googleusercontent.com";
+//		String apiSecret = "5sS6JWoF1plpGVAIvXc44xcK";
+		String apiKey = "353180287645.apps.googleusercontent.com";
+		String apiSecret = "5E3J7MH2j20E5EepfkA0FIe5";
+		
+		return  new ServiceBuilder().provider(GoogleApi20.class).apiKey(apiKey).apiSecret(apiSecret).scope(OAuthHandler.SCOPE).
+		        grantType(OAuthHandler.GRANT_TYPE).callback(callbackUrl).build();
 	}
 }
