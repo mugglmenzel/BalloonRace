@@ -125,8 +125,6 @@ public class OAuthHandler implements ParameterHandler {
 	}
 	private OAuthService getService(){
 
-//		String apiKey = "468842765661-6h31fuui4vgmvd170k6qgl6vc080qs6r.apps.googleusercontent.com";
-//		String apiSecret = "5sS6JWoF1plpGVAIvXc44xcK";
 		String apiKey = "353180287645.apps.googleusercontent.com";
 		String apiSecret = "5E3J7MH2j20E5EepfkA0FIe5";
 		
