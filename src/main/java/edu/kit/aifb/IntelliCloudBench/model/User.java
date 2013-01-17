@@ -30,15 +30,6 @@
 
 package edu.kit.aifb.IntelliCloudBench.model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -154,13 +145,13 @@ public class User implements Serializable, ICredentialsChangedListener {
 //		datastore.put(credentials);
 //	}
 
-	public Map<String, Credentials> loadCredentialsForProviderOld() {
-		@SuppressWarnings("unchecked")
-		Map<String, Credentials> credentialsForProvider = (Map<String, Credentials>) loadObject(KEY_CREDENTIALS);
-		if (credentialsForProvider == null)
-			credentialsForProvider = new HashMap<String, Credentials>();
-		return credentialsForProvider;
-	}
+//	public Map<String, Credentials> loadCredentialsForProviderOld() {
+//		@SuppressWarnings("unchecked")
+//		Map<String, Credentials> credentialsForProvider = (Map<String, Credentials>) loadObject(KEY_CREDENTIALS);
+//		if (credentialsForProvider == null)
+//			credentialsForProvider = new HashMap<String, Credentials>();
+//		return credentialsForProvider;
+//	}
 	
 	public Map<String, Credentials> loadCredentialsForProvider() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -192,14 +183,22 @@ public class User implements Serializable, ICredentialsChangedListener {
 //	}
 		
 
-	public void storeLastBenchmarkResultsOld() {
-		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
-		storeObject(KEY_RESULTS, resultsForAllBenchmarksForType);
-	}
+//	public void storeLastBenchmarkResultsOld() {
+//		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
+//		storeObject(KEY_RESULTS, resultsForAllBenchmarksForType);
+//	}
 	
 	public void storeLastBenchmarkResults() {
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		
 		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
-		storeObject(KEY_RESULTS, resultsForAllBenchmarksForType);
+		
+		BenchmarksObject benchmarksObject = new BenchmarksObject(KEY_RESULTS, resultsForAllBenchmarksForType);
+		try {
+			pm.makePersistent(benchmarksObject);
+		} finally {
+			pm.close();
+		}
 	}
 	
 	//TODO: Keine Obejkte vom Typ InstanceType, Benchmark, Result speicherbar --> JDO
@@ -236,17 +235,24 @@ public class User implements Serializable, ICredentialsChangedListener {
 //		return resultsForAllBenchmarksForType;
 //	}
 	
-	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResultsOld() {
-		@SuppressWarnings("unchecked")
-		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
-		    (Map<InstanceType, Multimap<Benchmark, Result>>) loadObject(KEY_RESULTS);
-		return benchmarkResultsForType;
-	}
+//	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResultsOld() {
+//		@SuppressWarnings("unchecked")
+//		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
+//		    (Map<InstanceType, Multimap<Benchmark, Result>>) loadObject(KEY_RESULTS);
+//		return benchmarkResultsForType;
+//	}
 	
 	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResults() {
-		@SuppressWarnings("unchecked")
+		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		
+		Key k = KeyFactory
+				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS);
+		BenchmarksObject benchmarksObject = pm.getObjectById(BenchmarksObject.class, k);
+		
 		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
-		    (Map<InstanceType, Multimap<Benchmark, Result>>) loadObject(KEY_RESULTS);
+		    benchmarksObject.getBenchmarks();
+		
 		return benchmarkResultsForType;
 	}
 
@@ -271,47 +277,45 @@ public class User implements Serializable, ICredentialsChangedListener {
 //		return object;
 //	}
 	
-	private void storeObject(String key, Object object) {
-		/*
-		try {
-			File file = new File("/tmp/" + key + "." + getId());
-			file.setExecutable(false);
-			file.setReadable(false);
-			file.setReadable(true, true);
-			file.setWritable(false);
-			file.setWritable(true, true);
-			FileOutputStream os = new FileOutputStream(file);
-			ObjectOutput output = new ObjectOutputStream(os);
-			try {
-				output.writeObject(object);
-			} finally {
-				output.close();
-			}
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		*/
-	}
-
-	private Object loadObject(String key) {
-		Object object = null;
-		try {
-			File file = new File("/tmp/" + key + "." + getId());
-			InputStream is = new FileInputStream(file);
-			ObjectInput input = new ObjectInputStream(is);
-			try {
-				object = input.readObject();
-			} finally {
-				input.close();
-			}
-		} catch (ClassNotFoundException ex) {
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (ClassCastException ex) {
-			ex.printStackTrace();
-		}
-		return object;
-	}
+//	private void storeObject(String key, Object object) {
+//		try {
+//			File file = new File("/tmp/" + key + "." + getId());
+//			file.setExecutable(false);
+//			file.setReadable(false);
+//			file.setReadable(true, true);
+//			file.setWritable(false);
+//			file.setWritable(true, true);
+//			FileOutputStream os = new FileOutputStream(file);
+//			ObjectOutput output = new ObjectOutputStream(os);
+//			try {
+//				output.writeObject(object);
+//			} finally {
+//				output.close();
+//			}
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+//	}
+//
+//	private Object loadObject(String key) {
+//		Object object = null;
+//		try {
+//			File file = new File("/tmp/" + key + "." + getId());
+//			InputStream is = new FileInputStream(file);
+//			ObjectInput input = new ObjectInputStream(is);
+//			try {
+//				object = input.readObject();
+//			} finally {
+//				input.close();
+//			}
+//		} catch (ClassNotFoundException ex) {
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		} catch (ClassCastException ex) {
+//			ex.printStackTrace();
+//		}
+//		return object;
+//	}
 
 	@Override
 	public void notifyCredentialsChanged(Provider provider, Credentials credentials) {
