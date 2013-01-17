@@ -78,7 +78,7 @@ public class WelcomeScreen extends Application implements Observer,
 	private static final String THEME = "custom";
 
 	private Window window = new Window(
-			"Ballon Race Ride - Intelligent Cloud Service Benchmarking",
+			"Balloon Race Ride - Intelligent Cloud Service Benchmarking",
 			new VerticalLayout());
 	private ICEPush pusher;
 
@@ -308,7 +308,7 @@ public class WelcomeScreen extends Application implements Observer,
 		panel.setWidth("100%");
 		window.getContent().replaceComponent(oldPanel, panel);
 		user.getUiState().setPanel(panel);
-		pusher.push();
+//		pusher.push();
 
 		if (user.getUiState().getCurrentScreen() == Screen.RUNS)
 			((RunningBenchmarksPanel) panel)
@@ -368,6 +368,7 @@ public class WelcomeScreen extends Application implements Observer,
 		logoBox.setHeight("120px");
 		header.addComponent(logoBox);
 
+		//Potentieller Error, wenn User kein Bild hinterlegt hat --> fixen!
 		Component userInfo = new UserInfoBox(user.getName(),
 				user.getPictureUrl());
 		header.addComponent(userInfo);

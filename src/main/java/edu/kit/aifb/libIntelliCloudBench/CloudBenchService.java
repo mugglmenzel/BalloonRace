@@ -31,7 +31,6 @@
 package edu.kit.aifb.libIntelliCloudBench;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -75,6 +75,16 @@ public class Credentials implements Serializable {
 		result = prime * result + ((secret == null) ? 0 : secret.hashCode());
 		return result;
 	}
+	
+	@Override
+	public String toString(){
+		if (key != "" && secret != ""){
+			return (key+":"+secret);
+		}
+		else {
+			return ("");
+		}
+	}
 
 	@Override
 	public boolean equals(Object obj) {

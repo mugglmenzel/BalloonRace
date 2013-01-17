@@ -91,9 +91,6 @@ public class OAuthHandler implements ParameterHandler {
 				userRequest.addHeader("GData-Version", "3.0");
 				Response userResponse = userRequest.send();
 
-				listener.setErrorMessage("Requested user info from google: "
-						+ userResponse.getBody());
-
 				/* Retrieve user info from JSON response */
 				if (userResponse.getBody() != null) {
 					Gson gson = new Gson();
@@ -120,7 +117,8 @@ public class OAuthHandler implements ParameterHandler {
 			}
 
 		} catch (Exception e) {
-			listener.setErrorMessage(e.getMessage());
+			e.printStackTrace();
+			listener.setErrorMessage(e.toString());
 		}
 	}
 	private OAuthService getService(){
