@@ -165,9 +165,11 @@
 					<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
 					<runTarget>IntelliCloudBench</runTarget>
 					<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
-					<noServer>true</noServer>
 					<port>8080</port>
-					<compileReport>false</compileReport>
+					<!-- <inplace>true</inplace> -->
+					<!-- <tomcat>${project.build.directory}/${project.build.finalName}/tomcat</tomcat> -->
+					<compileReport>true</compileReport>
+					<noServer>true</noServer>
 				</configuration>
 				<executions>
 					<execution>
@@ -520,6 +522,13 @@
 			<version>1.1.5</version>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.google.appengine.orm</groupId>
+			<artifactId>datanucleus-appengine</artifactId>
+			<version>1.0.10</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>geronimo-jpa_3.0_spec</artifactId>

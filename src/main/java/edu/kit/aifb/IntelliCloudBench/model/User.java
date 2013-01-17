@@ -272,6 +272,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 //	}
 	
 	private void storeObject(String key, Object object) {
+		/*
 		try {
 			File file = new File("/tmp/" + key + "." + getId());
 			file.setExecutable(false);
@@ -289,6 +290,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+		*/
 	}
 
 	private Object loadObject(String key) {
