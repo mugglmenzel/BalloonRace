@@ -16,23 +16,20 @@ import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
-public class PersistentBenchmarksObject {
+public class BenchmarksObject {
 	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Key key;
 
-	@Persistent
-	private String name;
+	@Persistent(serialized = "true", defaultFetchGroup = "true")
+	private Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType;
 
-	@Persistent(serialized = "true")
-	private BenchmarksFile benchmarksFile;
-
-	public PersistentBenchmarksObject(
-			String name,
+	public BenchmarksObject(
+			Key key,
 			Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType) {
 
-		benchmarksFile = new BenchmarksFile(name,
-				resultsForAllBenchmarksForType);
+		this.key = key;
+		this.resultsForAllBenchmarksForType = resultsForAllBenchmarksForType;
 
 	}
 
@@ -40,12 +37,8 @@ public class PersistentBenchmarksObject {
 		return key;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public BenchmarksFile getBenchmarksFile() {
-		return benchmarksFile;
+	public Map<InstanceType, Multimap<Benchmark, Result>> getBenchmarks() {
+		return resultsForAllBenchmarksForType;
 	}
 
 }

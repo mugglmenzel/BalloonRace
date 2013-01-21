@@ -3,7 +3,7 @@
  */
 package edu.kit.aifb.IntelliCloudBench.util.persistence;
 
-import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -17,34 +17,25 @@ import com.google.appengine.api.datastore.Key;
 import edu.kit.aifb.libIntelliCloudBench.model.Credentials;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
-public class PersistentCredentialsObject implements Serializable {
-
-	private static final long serialVersionUID = -7451555501182413290L;
-
+public class CredentialsObject  {
 	@PrimaryKey
 	@Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
 	private Key key;
-	
-	@Persistent
-	private String name;
 
-	@Persistent(serialized = "true")
-	private CredentialsFile credentialsFile;
+	@Persistent(serialized = "true", defaultFetchGroup = "true")
+	private Map<String, Credentials> credentials = new HashMap<String, Credentials>();
 
-	public PersistentCredentialsObject(String name, Map<String, Credentials> credentials) {
-		credentialsFile = new CredentialsFile (name, credentials);
+	public CredentialsObject(Key key, Map<String, Credentials> credentials) {
+		this.key = key;
+		this.credentials = credentials;
 	}
 
 	public Key getKey() {
 		return key;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public CredentialsFile getCredentialsFile() {
-		return credentialsFile;
+	public Map<String, Credentials> getCredentials() {
+		return credentials;
 	}
 
 }
