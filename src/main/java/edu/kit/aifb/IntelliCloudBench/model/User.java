@@ -36,15 +36,14 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
-import edu.kit.aifb.IntelliCloudBench.util.persistence.CredentialsObject;
-
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Multimap;
 import com.google.gson.annotations.SerializedName;
 
-import edu.kit.aifb.IntelliCloudBench.util.persistence.BenchmarksObject;
-import edu.kit.aifb.IntelliCloudBench.util.persistence.PMF;
+import edu.kit.aifb.IntelliCloudBench.model.persistence.BenchmarksObject;
+import edu.kit.aifb.IntelliCloudBench.model.persistence.CredentialsObject;
+import edu.kit.aifb.IntelliCloudBench.model.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.CloudBenchService;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.Credentials;
@@ -132,7 +131,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 		for (Provider provider : getService().getAllProviders()) {
 			credentialsForProvider.put(provider.getId(), provider.getCredentials());
 		}
-		Key credentialsKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS);
+		Key credentialsKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+getId());
 		CredentialsObject credentialsObject = new CredentialsObject(credentialsKey, credentialsForProvider);
 		try {
 			pm.makePersistent(credentialsObject);
@@ -161,7 +160,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 	public Map<String, Credentials> loadCredentialsForProvider() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Key k = KeyFactory
-				.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS);
+				.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+getId());
 		Map<String, Credentials> credentialsForProvider = null;
 		try{
 			CredentialsObject credentialsObject = pm.getObjectById(CredentialsObject.class, k);
@@ -203,7 +202,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 		
 		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
 		
-		Key benchmarksKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_RESULTS);
+		Key benchmarksKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_RESULTS+getId());
 		BenchmarksObject benchmarksObject = new BenchmarksObject(benchmarksKey, resultsForAllBenchmarksForType);
 		try {
 			pm.makePersistent(benchmarksObject);
@@ -258,7 +257,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		
 		Key k = KeyFactory
-				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS);
+				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS+getId());
 		BenchmarksObject benchmarksObject = pm.getObjectById(BenchmarksObject.class, k);
 		
 		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =

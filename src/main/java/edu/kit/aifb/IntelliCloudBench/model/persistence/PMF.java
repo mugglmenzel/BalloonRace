@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.kit.aifb.IntelliCloudBench.util.persistence;
+package edu.kit.aifb.IntelliCloudBench.model.persistence;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
