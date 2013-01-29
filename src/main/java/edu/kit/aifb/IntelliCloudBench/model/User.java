@@ -36,14 +36,12 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
-import edu.kit.aifb.IntelliCloudBench.util.persistence.CredentialsObject;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Multimap;
 import com.google.gson.annotations.SerializedName;
 
-import edu.kit.aifb.IntelliCloudBench.util.persistence.BenchmarksObject;
 import edu.kit.aifb.IntelliCloudBench.util.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.CloudBenchService;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;

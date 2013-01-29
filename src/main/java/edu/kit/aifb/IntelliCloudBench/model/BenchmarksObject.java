@@ -1,4 +1,4 @@
-package edu.kit.aifb.IntelliCloudBench.util.persistence;
+package edu.kit.aifb.IntelliCloudBench.model;
 
 import java.util.Map;
 

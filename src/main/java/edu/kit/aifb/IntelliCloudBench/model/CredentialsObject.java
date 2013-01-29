@@ -1,7 +1,7 @@
 /* Copyright (c) 2013 Robin Hoffmann
  *
  */
-package edu.kit.aifb.IntelliCloudBench.util.persistence;
+package edu.kit.aifb.IntelliCloudBench.model;
 
 import java.util.HashMap;
 import java.util.Map;

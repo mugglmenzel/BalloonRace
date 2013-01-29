@@ -43,12 +43,10 @@ import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
-import org.jclouds.ssh.jsch.config.JschSshClientModule;
 import org.vaadin.artur.icepush.ICEPush;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.inject.Module;
 
 import edu.kit.aifb.libIntelliCloudBench.background.Runner;
 import edu.kit.aifb.libIntelliCloudBench.metrics.MetricsConfiguration;
@@ -63,7 +61,8 @@ import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
 import edu.kit.aifb.libIntelliCloudBench.stopping.StoppingConfiguration;
 import edu.kit.aifb.libIntelliCloudBench.stopping.StoppingMethod;
 
-public class CloudBenchService extends Observable implements Serializable, ICredentialsChangedListener, IService {
+public class CloudBenchService extends Observable implements Serializable,
+		ICredentialsChangedListener, IService {
 	private static final long serialVersionUID = -7680311779178774123L;
 
 	private LinkedList<Provider> providers = new LinkedList<Provider>();
@@ -109,7 +108,8 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 
 	public Iterable<Provider> getAllProviders() {
 		if (providers.isEmpty()) {
-			for (ProviderMetadata provider : Providers.viewableAs(ComputeServiceContext.class)) {
+			for (ProviderMetadata provider : Providers
+					.viewableAs(ComputeServiceContext.class)) {
 				providers.add(new Provider(provider));
 			}
 		}
@@ -127,11 +127,20 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 	public ComputeServiceContext getContext(Provider provider) {
 		ComputeServiceContext context = contextForProvider.get(provider);
 		Credentials credentials = provider.getCredentials();
+		// Set<Module> modules = new HashSet<Module>();
+		// modules.add(new JschSshClientModule());
+		// modules.add(new
+		// org.jclouds.gae.config.AsyncGoogleAppEngineConfigurationModule());
+
 		if (context == null && provider.areCredentialsSetup()) {
 			provider.registerCredentialsChangedListener(this);
-			context =
-			    ContextBuilder.newBuilder(provider.getId()).credentials(credentials.getKey(), credentials.getSecret())
-			        .modules(ImmutableSet.<Module> of(new JschSshClientModule())).buildView(ComputeServiceContext.class);
+			context = ContextBuilder
+					.newBuilder(provider.getId())
+					.credentials(credentials.getKey(), credentials.getSecret())
+					.modules(
+							ImmutableSet
+									.of(new org.jclouds.gae.config.GoogleAppEngineConfigurationModule()))
+					.buildView(ComputeServiceContext.class);
 		}
 		return context;
 	}
@@ -140,7 +149,8 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 		return metricsConfiguration;
 	}
 
-	public void setMetricsConfiguration(MetricsConfiguration metricsConfiguration) {
+	public void setMetricsConfiguration(
+			MetricsConfiguration metricsConfiguration) {
 		this.metricsConfiguration = metricsConfiguration;
 	}
 
@@ -148,25 +158,30 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 		return stoppingConfiguration;
 	}
 
-	public void setStoppingConfiguration(StoppingConfiguration stoppingConfiguration) {
+	public void setStoppingConfiguration(
+			StoppingConfiguration stoppingConfiguration) {
 		this.stoppingConfiguration = stoppingConfiguration;
 	}
 
 	@Override
-	public void notifyCredentialsChanged(Provider provider, Credentials credentials) {
+	public void notifyCredentialsChanged(Provider provider,
+			Credentials credentials) {
 		contextForProvider.remove(provider);
 	}
 
-	public void prepareBenchmarking(List<InstanceType> checkedInstanceTypes, Class<? extends Runner> runnerClass) {
+	public void prepareBenchmarking(List<InstanceType> checkedInstanceTypes,
+			Class<? extends Runner> runnerClass) {
 		this.resultsForAllBenchmarksForType.clear();
 		this.benchmarks = metricsConfiguration.getSelectedBenchmarks();
 		this.numberOfRunnersDone = 0;
 
-		Integer stoppingMethodIndex = stoppingConfiguration.getSelectedStoppingMethodIndex();
+		Integer stoppingMethodIndex = stoppingConfiguration
+				.getSelectedStoppingMethodIndex();
 
 		try {
-			this.stopper =
-			    StoppingConfiguration.newInstanceOf(stoppingMethodIndex, this, runnerClass, checkedInstanceTypes, benchmarks);
+			this.stopper = StoppingConfiguration.newInstanceOf(
+					stoppingMethodIndex, this, runnerClass,
+					checkedInstanceTypes, benchmarks);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -198,7 +213,8 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 	public void notifyFinished(Runner runner) {
 		/* Get results */
 		InstanceType instanceType = runner.getInstanceState().getInstanceType();
-		Multimap<Benchmark, Result> benchmarkResults = runner.getBenchmarkResults();
+		Multimap<Benchmark, Result> benchmarkResults = runner
+				.getBenchmarkResults();
 		if (benchmarkResults != null)
 			resultsForAllBenchmarksForType.put(instanceType, benchmarkResults);
 
@@ -219,10 +235,13 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 		return resultsForAllBenchmarksForType;
 	}
 
-	public void setBenchmarkResultsForType(Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType) {
+	public void setBenchmarkResultsForType(
+			Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType) {
 		this.resultsForAllBenchmarksForType = resultsForAllBenchmarksForType;
-		InstanceType instanceType = resultsForAllBenchmarksForType.keySet().iterator().next();
-		this.benchmarks = new LinkedList<Benchmark>(resultsForAllBenchmarksForType.get(instanceType).keySet());
+		InstanceType instanceType = resultsForAllBenchmarksForType.keySet()
+				.iterator().next();
+		this.benchmarks = new LinkedList<Benchmark>(
+				resultsForAllBenchmarksForType.get(instanceType).keySet());
 	}
 
 	public String getStopperLog() {
@@ -232,8 +251,8 @@ public class CloudBenchService extends Observable implements Serializable, ICred
 	}
 
 	@Override
-  public ComputeService getComputeService(Provider provider) {
-	  return this.getContext(provider).getComputeService();
-  }
+	public ComputeService getComputeService(Provider provider) {
+		return this.getContext(provider).getComputeService();
+	}
 
 }
