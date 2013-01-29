@@ -85,12 +85,19 @@ public class CloudBenchService extends Observable implements Serializable,
 
 	private StoppingMethod stopper;
 
-	public CloudBenchService() {
+	private static CloudBenchService service = new CloudBenchService();
+
+	private CloudBenchService() {
 		this("libIntelliCloudBench");
 	}
 
-	public CloudBenchService(String name) {
+	private CloudBenchService(String name) {
 		this.name = name;
+		service = this;
+	}
+
+	public static CloudBenchService get() {
+		return service;
 	}
 
 	public ICEPush getPusher() {
@@ -134,13 +141,18 @@ public class CloudBenchService extends Observable implements Serializable,
 
 		if (context == null && provider.areCredentialsSetup()) {
 			provider.registerCredentialsChangedListener(this);
-			context = ContextBuilder
-					.newBuilder(provider.getId())
-					.credentials(credentials.getKey(), credentials.getSecret())
-					.modules(
-							ImmutableSet
-									.of(new org.jclouds.gae.config.GoogleAppEngineConfigurationModule()))
-					.buildView(ComputeServiceContext.class);
+			try {
+				context = ContextBuilder
+						.newBuilder(provider.getId())
+						.credentials(credentials.getKey(),
+								credentials.getSecret())
+						.modules(
+								ImmutableSet
+										.of(new org.jclouds.gae.config.GoogleAppEngineConfigurationModule()))
+						.buildView(ComputeServiceContext.class);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return context;
 	}

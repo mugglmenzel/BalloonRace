@@ -143,7 +143,7 @@ public class ProviderNodeComponent extends NodeComponent<Provider> {
 	@Override
 	void addSubTreeElements(VerticalLayout subTreeLayout) throws NotReadyException {
 
-		Iterable<Region> allRegions = model.getBean().getAllRegions(service.getContext(this.model.getBean()), this);
+		Iterable<Region> allRegions = model.getBean().getAllRegions(service, this);
 		RegionNodeComponent regionNode;
 		BeanItem<Region> model;
 
@@ -151,7 +151,7 @@ public class ProviderNodeComponent extends NodeComponent<Provider> {
 			for (Region region : allRegions) {
 				model = new BeanItem<Region>(region);
 
-				regionNode = new RegionNodeComponent(service.getContext(this.model.getBean()), this, model, checked);
+				regionNode = new RegionNodeComponent(this, model, checked);
 				model.addListener(regionNode);
 
 				if (!Iterators.contains(subTreeLayout.getComponentIterator(), regionNode)) {
@@ -173,5 +173,12 @@ public class ProviderNodeComponent extends NodeComponent<Provider> {
 			allCheckedLeafs.addAll(regionNode.getCheckedInstanceTypes());
 		}
 		return allCheckedLeafs;
+	}
+
+	/**
+	 * @return the service
+	 */
+	public CloudBenchService getService() {
+		return service;
 	}
 }

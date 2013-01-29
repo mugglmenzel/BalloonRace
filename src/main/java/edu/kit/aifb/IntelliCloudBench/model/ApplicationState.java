@@ -61,7 +61,7 @@ public class ApplicationState {
 	public static CloudBenchService getCloudBenchServiceForUser(User user) {
 		CloudBenchService service = serviceForUser.get(user.getId());
 		if (service == null) {
-			service = new CloudBenchService();
+			service = CloudBenchService.get();
 			serviceForUser.put(user.getId(), service);
 		}
 		return service;

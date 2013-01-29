@@ -39,21 +39,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
 
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.Hardware;
 import org.jclouds.domain.Location;
 import org.jclouds.providers.ProviderMetadata;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import edu.kit.aifb.libIntelliCloudBench.CloudBenchService;
 
 public class Provider extends Observable implements Serializable {
 	private static final long serialVersionUID = 7347235110052708192L;
@@ -67,9 +60,6 @@ public class Provider extends Observable implements Serializable {
 	private boolean loadedAllHardwareTypes = false;
 
 	private static Map<Provider, List<ICredentialsChangedListener>> credentialsListener = new HashMap<Provider, List<ICredentialsChangedListener>>();
-
-	private static ListeningExecutorService executor = MoreExecutors
-			.listeningDecorator(Executors.newCachedThreadPool());
 
 	public Provider(ProviderMetadata provider) {
 		this.id = provider.getId();
@@ -112,10 +102,10 @@ public class Provider extends Observable implements Serializable {
 		credentialsListener.get(this).add(listener);
 	}
 
-	public Iterable<Region> getAllRegions(ComputeServiceContext context,
+	public Iterable<Region> getAllRegions(CloudBenchService service,
 			Observer observer) throws NotReadyException {
 		if (allRegions.isEmpty()) {
-			updateAllRegions(context, observer);
+			updateAllRegions(getComputeServiceContext(service), observer);
 		}
 		if (loadedAllRegions) {
 			return allRegions;
@@ -125,10 +115,10 @@ public class Provider extends Observable implements Serializable {
 	}
 
 	public Iterable<HardwareType> getAllHardwareTypes(
-			ComputeServiceContext context, Observer observer)
+			CloudBenchService service, Observer observer)
 			throws NotReadyException {
 		if (allHardwareTypes.isEmpty()) {
-			updateAllHardwareTypes(context, observer);
+			updateAllHardwareTypes(service.getContext(this), observer);
 		}
 		if (loadedAllHardwareTypes) {
 			return allHardwareTypes;
@@ -154,44 +144,22 @@ public class Provider extends Observable implements Serializable {
 
 	public void updateAllHardwareTypes(final ComputeServiceContext context,
 			final Observer observer) {
-		ListenableFuture<Set<Hardware>> allInProgress = executor
-				.submit(new Callable<Set<Hardware>>() {
 
-					@Override
-					public Set<Hardware> call() throws Exception {
-						return Collections.unmodifiableSet(context
-								.getComputeService().listHardwareProfiles());
-					}
+		loadedAllHardwareTypes = false;
+		allHardwareTypes.clear();
+		for (Hardware hardware : Collections.unmodifiableSet(context
+				.getComputeService().listHardwareProfiles())) {
+			HardwareType hardwareType = new HardwareType(hardware);
+			allHardwareTypes.add(hardwareType);
+		}
+		loadedAllHardwareTypes = true;
 
-				});
-		Futures.addCallback(allInProgress, new FutureCallback<Set<Hardware>>() {
+		observer.update(Provider.this, allHardwareTypes);
+	}
 
-			@Override
-			public void onSuccess(Set<Hardware> hardwareList) {
-				synchronized (allHardwareTypes) {
-					loadedAllHardwareTypes = false;
-					allHardwareTypes.clear();
-					for (Hardware hardware : hardwareList) {
-						HardwareType hardwareType = new HardwareType(hardware);
-						allHardwareTypes.add(hardwareType);
-					}
-					loadedAllHardwareTypes = true;
-				}
-
-				synchronized (observer) {
-					observer.update(Provider.this, allHardwareTypes);
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				t.printStackTrace();
-				synchronized (observer) {
-					observer.update(Provider.this, t);
-				}
-			}
-
-		});
+	private ComputeServiceContext getComputeServiceContext(
+			CloudBenchService service) {
+		return service.getContext(this);
 	}
 
 	@Override

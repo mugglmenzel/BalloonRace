@@ -32,12 +32,9 @@ package edu.kit.aifb.libIntelliCloudBench.model.json;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +57,13 @@ public class CostsStore implements IMetricsType, Serializable {
 
 	private static Gson gson;
 
+	/**
+	 * 
+	 */
+	public CostsStore() {
+		super();
+	}
+
 	@Override
 	public String getId() {
 		return "costs";
@@ -71,27 +75,31 @@ public class CostsStore implements IMetricsType, Serializable {
 	}
 
 	public Double getCostsForMonthsRunning(InstanceType instanceType, int months) {
-		Costs costs =
-		    getCosts(instanceType.getProvider().getId(), instanceType.getRegion().getId(), instanceType.getHardwareType()
-		        .getId());
-		return costs.getFixedCosts() + months * 30 * 24 * costs.getVariableCosts();
+		Costs costs = getCosts(instanceType.getProvider().getId(), instanceType
+				.getRegion().getId(), instanceType.getHardwareType().getId());
+		return costs.getFixedCosts() + months * 30 * 24
+				* costs.getVariableCosts();
 	}
 
 	public Costs getCosts(InstanceType instanceType) {
-		return getCosts(instanceType.getProvider().getId(), instanceType.getRegion().getId(), instanceType
-		    .getHardwareType().getId());
+		return getCosts(instanceType.getProvider().getId(), instanceType
+				.getRegion().getId(), instanceType.getHardwareType().getId());
 	}
 
-	public Costs getCosts(String providerId, String regionId, String hardwareTypeId) {
-		Costs costs = costsByType.get(providerId + "-" + regionId + "-" + hardwareTypeId);
+	public Costs getCosts(String providerId, String regionId,
+			String hardwareTypeId) {
+		Costs costs = costsByType.get(providerId + "-" + regionId + "-"
+				+ hardwareTypeId);
 		if (costs == null) {
 			costs = new Costs(0d, 0d);
-			costsByType.put(providerId + "-" + regionId + "-" + hardwareTypeId, costs);
+			costsByType.put(providerId + "-" + regionId + "-" + hardwareTypeId,
+					costs);
 		}
 		return costs;
 	}
 
-	public void setVariableCosts(String providerId, String regionId, String hardwareTypeId, double variableCosts) {
+	public void setVariableCosts(String providerId, String regionId,
+			String hardwareTypeId, double variableCosts) {
 		String id = providerId + "-" + regionId + "-" + hardwareTypeId;
 		Costs costs = costsByType.get(id);
 		if (costs == null) {
@@ -102,7 +110,8 @@ public class CostsStore implements IMetricsType, Serializable {
 		}
 	}
 
-	public void setFixedCosts(String providerId, String regionId, String hardwareTypeId, double fixedCosts) {
+	public void setFixedCosts(String providerId, String regionId,
+			String hardwareTypeId, double fixedCosts) {
 		String id = providerId + "-" + regionId + "-" + hardwareTypeId;
 		Costs costs = costsByType.get(id);
 		if (costs == null) {
@@ -128,7 +137,8 @@ public class CostsStore implements IMetricsType, Serializable {
 		FileInputStream costsResourceFile = null;
 		try {
 			costsResourceFile = new FileInputStream(costsResourceUrl.getFile());
-			costsStore = getGson().fromJson(new InputStreamReader(costsResourceFile), CostsStore.class);
+			costsStore = getGson().fromJson(
+					new InputStreamReader(costsResourceFile), CostsStore.class);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (JsonIOException e) {
@@ -151,7 +161,7 @@ public class CostsStore implements IMetricsType, Serializable {
 	}
 
 	public static String dumpCostsStore(CostsStore costsStore) {
-			return getGson().toJson(costsStore);
+		return getGson().toJson(costsStore);
 	}
 
 	private static Gson getGson() {
@@ -167,6 +177,10 @@ public class CostsStore implements IMetricsType, Serializable {
 		private double variableCosts;
 		/* Fixed costs per month in 1/10 USD cent */
 		private double fixedCosts;
+
+		public Costs() {
+			super();
+		}
 
 		public Costs(double variableCosts, double fixedCosts) {
 			this.setVariableCosts(variableCosts);
