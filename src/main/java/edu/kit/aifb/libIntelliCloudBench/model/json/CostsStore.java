@@ -179,7 +179,6 @@ public class CostsStore implements IMetricsType, Serializable {
 		private double fixedCosts;
 
 		public Costs() {
-			super();
 		}
 
 		public Costs(double variableCosts, double fixedCosts) {

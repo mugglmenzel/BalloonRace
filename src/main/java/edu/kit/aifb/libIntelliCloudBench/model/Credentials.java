@@ -45,6 +45,7 @@ public class Credentials implements Serializable {
 	public Credentials(String key, String secret) {
 		this.key = key;
 		this.secret = secret;
+
 	}
 
 	public Credentials(Credentials anotherCredentials) {

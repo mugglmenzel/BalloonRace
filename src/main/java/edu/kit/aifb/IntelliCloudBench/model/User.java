@@ -33,6 +33,7 @@ package edu.kit.aifb.IntelliCloudBench.model;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 
@@ -54,6 +55,7 @@ import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
 
 public class User implements Serializable, ICredentialsChangedListener {
 	private static final long serialVersionUID = 1515385475851375669L;
+	private static Logger log = Logger.getLogger(User.class.getName());
 
 	private static final String KEY_CREDENTIALS = "credentials";
 	private static final String KEY_RESULTS = "results";
@@ -122,7 +124,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 //		}
 //		storeObject(KEY_CREDENTIALS, credentialsForProvider);
 //	}
-	
+	//TODO: Verschluesseln!
 	private void storeCredentialsForProvider() {
 		
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -131,23 +133,17 @@ public class User implements Serializable, ICredentialsChangedListener {
 		for (Provider provider : getService().getAllProviders()) {
 			credentialsForProvider.put(provider.getId(), provider.getCredentials());
 		}
-		Key credentialsKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+getId());
+		Key credentialsKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+"."+getId());
 		CredentialsObject credentialsObject = new CredentialsObject(credentialsKey, credentialsForProvider);
 		try {
 			pm.makePersistent(credentialsObject);
+			//TODO: nach Debugging entfernen!
+			log.info("Succesfully stored Credentials: "+credentialsForProvider);
+			log.info("Test retrieve: "+loadCredentialsForProvider());
 		} finally {
 			pm.close();
 		}
 	}
-	
-//	private void storeCredentialsForProviderLowLevel() {
-//		Entity credentials = new Entity(KEY_CREDENTIALS + "." + getId(), KEY_CREDENTIALS);
-//
-//		for (Provider provider : getService().getAllProviders()) {
-//			credentials.setProperty(provider.getId(), provider.getCredentials().toString());
-//		}
-//		datastore.put(credentials);
-//	}
 
 //	public Map<String, Credentials> loadCredentialsForProviderOld() {
 //		@SuppressWarnings("unchecked")
@@ -160,36 +156,19 @@ public class User implements Serializable, ICredentialsChangedListener {
 	public Map<String, Credentials> loadCredentialsForProvider() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Key k = KeyFactory
-				.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+getId());
+				.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+"."+getId());
 		Map<String, Credentials> credentialsForProvider = null;
 		try{
 			CredentialsObject credentialsObject = pm.getObjectById(CredentialsObject.class, k);
 			credentialsForProvider = credentialsObject.getCredentials();
 		}
 		catch (Exception e){
+			log.info("Credentials not found, will create new Map.");
 			credentialsForProvider = new HashMap<String, Credentials>();
 		}
 		return credentialsForProvider;
 		
 	}
-	
-//	public Map<String, Credentials> loadCredentialsForProviderLowLevel() {
-//		Map<String, Credentials> credentialsForProvider = new HashMap<String, Credentials>();
-//		Key credentialsKey = KeyFactory.createKey(KEY_CREDENTIALS + "." + getId(), KEY_CREDENTIALS);
-//		try {
-//			Entity credentials = datastore.get(credentialsKey);
-//			Map<String, Object> credentialsForProviderTemp = credentials.getProperties();
-//			for (String id : credentialsForProviderTemp.keySet()){
-//				Credentials credential = new Credentials(((String)credentialsForProviderTemp.get(id)).split(":")[0],
-//															((String)credentialsForProviderTemp.get(id)).split(":")[1]);
-//				credentialsForProvider.put(id, credential);
-//			}
-//			
-//		} catch (EntityNotFoundException e) {
-//			System.out.println(e.getMessage());  
-//		}
-//		return credentialsForProvider;
-//	}
 		
 
 //	public void storeLastBenchmarkResultsOld() {
@@ -202,48 +181,17 @@ public class User implements Serializable, ICredentialsChangedListener {
 		
 		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
 		
-		Key benchmarksKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_RESULTS+getId());
+		Key benchmarksKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_RESULTS+"."+getId());
 		BenchmarksObject benchmarksObject = new BenchmarksObject(benchmarksKey, resultsForAllBenchmarksForType);
 		try {
 			pm.makePersistent(benchmarksObject);
+			//TODO: nach Debugging entfernen!
+			log.info("Succesfully stored Benchmark Results: "+resultsForAllBenchmarksForType);
 		} finally {
 			pm.close();
 		}
 	}
-	
-	//TODO: Keine Obejkte vom Typ InstanceType, Benchmark, Result speicherbar --> JDO
-//	public void storeLastBenchmarkResultsLowLevel() {
-//		
-//		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
-//		List<Entity> instanceTypes = new ArrayList<Entity>();
-//
-//		for (InstanceType type : resultsForAllBenchmarksForType.keySet()){
-//			for (Benchmark benchmark : resultsForAllBenchmarksForType.get(type).keySet()) {
-//				Entity instanceType = new Entity(KEY_RESULTS + "." + getId() + "." + type.hashCode());
-//				instanceType.setProperty("InstanceType", type);
-//				instanceType.setProperty("Benchmark", benchmark);
-//				instanceType.setProperty("Results", resultsForAllBenchmarksForType.get(type).get(benchmark));
-//				instanceTypes.add(instanceType);
-//			}
-//		}
-//		datastore.put(instanceTypes);	
-//
-//	}
 
-//	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResults() {
-//		
-//		Key benchmarksKey = KeyFactory.createKey(KEY_RESULTS + "." + getId(), KEY_RESULTS);
-//		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = new HashMap <InstanceType, Multimap<Benchmark, Result>>();
-//		LinkedListMultimap<Benchmark, Result> resultsForBenchmark = LinkedListMultimap.create();
-//		
-//		Query benchmarkQuery = new Query("Benchmarks").setAncestor(benchmarksKey);
-//		List<Entity> instanceTypes = datastore.prepare(benchmarkQuery).asList(FetchOptions.Builder.withDefaults());
-//		for (Entity instanceType : instanceTypes){
-//				resultsForBenchmark.put((Benchmark)instanceType.getProperty("Benchmark"), (Result)instanceType.getProperty("Results"));
-//				resultsForAllBenchmarksForType.put((InstanceType)instanceType.getProperty("InstanceType"), resultsForBenchmark);
-//		}		
-//		return resultsForAllBenchmarksForType;
-//	}
 	
 //	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResultsOld() {
 //		@SuppressWarnings("unchecked")
@@ -257,7 +205,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		
 		Key k = KeyFactory
-				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS+getId());
+				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS+"."+getId());
 		BenchmarksObject benchmarksObject = pm.getObjectById(BenchmarksObject.class, k);
 		
 		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
@@ -266,26 +214,6 @@ public class User implements Serializable, ICredentialsChangedListener {
 		return benchmarkResultsForType;
 	}
 
-
-//	private void storeObject(String key, Object object) {
-//
-//			Entity data = new Entity(key + "." + getId(), key);
-//			data.setProperty("value", object);
-//			datastore.put(data);
-//			
-//	}
-
-//	private Object loadObject(String key) {
-//		Object object = null;
-//		Key datastoreKey = KeyFactory.createKey(key + "." + getId(), key);
-//			try {
-//				Entity data = datastore.get(datastoreKey);
-//				object = data.getProperty("value");
-//			} catch (EntityNotFoundException e) {
-//				e.printStackTrace();
-//			}
-//		return object;
-//	}
 	
 //	private void storeObject(String key, Object object) {
 //		try {

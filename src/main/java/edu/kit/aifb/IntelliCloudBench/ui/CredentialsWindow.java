@@ -53,6 +53,7 @@ public class CredentialsWindow extends Window implements PropertySetChangeListen
   public CredentialsWindow(final Provider provider, Credentials credentials) {
   	this.provider = provider;
   	model = new BeanItem<Credentials>(credentials);
+  	
   	model.addListener(this);
 
   	setModal(true);
