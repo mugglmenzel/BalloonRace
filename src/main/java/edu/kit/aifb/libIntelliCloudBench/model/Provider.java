@@ -92,9 +92,10 @@ public class Provider extends Observable implements Serializable {
 			allRegions.clear();
 		}
 		for (ICredentialsChangedListener listener : credentialsListener
-				.get(this)) {
-			listener.notifyCredentialsChanged(this, credentials);
-		}
+				.get(this))
+			if (listener != null)
+				listener.notifyCredentialsChanged(this, credentials);
+
 	}
 
 	public void registerCredentialsChangedListener(
