@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Alignment;
@@ -69,6 +70,7 @@ public class ServiceSelectionPanel extends Panel {
 		Map<String, Credentials> credentialsForProviders = user.loadCredentialsForProvider();
 		Credentials credentials;
 
+		Logger.getAnonymousLogger().info("service panel - creating provider list with credentials from DB");
 		/* Provider tree */
 		for (Provider provider : user.getService().getAllProviders()) {
 			credentials = credentialsForProviders.get(provider.getId());

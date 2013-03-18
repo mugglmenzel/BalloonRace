@@ -30,6 +30,8 @@
 
 package edu.kit.aifb.IntelliCloudBench.ui;
 
+import java.util.logging.Logger;
+
 import com.vaadin.data.Item.PropertySetChangeEvent;
 import com.vaadin.data.Item.PropertySetChangeListener;
 import com.vaadin.data.util.BeanItem;
@@ -41,6 +43,7 @@ import com.vaadin.ui.Form;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
+import edu.kit.aifb.IntelliCloudBench.model.ApplicationState;
 import edu.kit.aifb.libIntelliCloudBench.model.Credentials;
 import edu.kit.aifb.libIntelliCloudBench.model.Provider;
 
@@ -57,6 +60,8 @@ public class CredentialsWindow extends Window implements
 
 		model.addListener(this);
 
+		
+		
 		setModal(true);
 		setWidth("400px");
 		setCaption(provider.getName());
@@ -93,6 +98,7 @@ public class CredentialsWindow extends Window implements
 
 	@Override
 	public void itemPropertySetChange(PropertySetChangeEvent event) {
+		Logger.getAnonymousLogger().info("credentials changed: " + model.getBean());
 		provider.credentialsChanged();
 	}
 

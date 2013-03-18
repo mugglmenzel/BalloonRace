@@ -39,11 +39,18 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
+import edu.kit.aifb.IntelliCloudBench.model.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.metrics.IMetricsType;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
@@ -133,26 +140,25 @@ public class CostsStore implements IMetricsType, Serializable {
 	private static CostsStore loadCostsStore() {
 		CostsStore costsStore = null;
 
-		URL costsResourceUrl = Benchmark.class.getResource(costsFilename);
-		FileInputStream costsResourceFile = null;
-		try {
-			costsResourceFile = new FileInputStream(costsResourceUrl.getFile());
-			costsStore = getGson().fromJson(
-					new InputStreamReader(costsResourceFile), CostsStore.class);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (JsonIOException e) {
-			e.printStackTrace();
-		} catch (JsonSyntaxException e) {
-			e.printStackTrace();
-		} finally {
-			if (costsResourceFile != null)
-				try {
-					costsResourceFile.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-		}
+		//TODO: Finish PM impl for costs
+		/*costsStore = PMF
+				.get()
+				.getPersistenceManager()
+				.getObjectById(Costs.class,
+						KeyFactory.createKey(Costs.class.getSimpleName(), 1));*/
+
+		/*
+		 * URL costsResourceUrl = Benchmark.class.getResource(costsFilename);
+		 * FileInputStream costsResourceFile = null; try { costsResourceFile =
+		 * new FileInputStream(costsResourceUrl.getFile()); costsStore =
+		 * getGson().fromJson( new InputStreamReader(costsResourceFile),
+		 * CostsStore.class); } catch (FileNotFoundException e) {
+		 * e.printStackTrace(); } catch (JsonIOException e) {
+		 * e.printStackTrace(); } catch (JsonSyntaxException e) {
+		 * e.printStackTrace(); } finally { if (costsResourceFile != null) try {
+		 * costsResourceFile.close(); } catch (IOException e) {
+		 * e.printStackTrace(); } }
+		 */
 
 		if (costsStore == null)
 			costsStore = new CostsStore();
@@ -170,20 +176,38 @@ public class CostsStore implements IMetricsType, Serializable {
 		return gson;
 	}
 
+	@PersistenceCapable
 	public class Costs implements Serializable {
 		private static final long serialVersionUID = -1632289006194114301L;
 
+		@PrimaryKey
+		@Persistent
+		private Key key;
 		/* Variable costs per hour in 1/10 USD cent */
+		@Persistent
 		private double variableCosts;
 		/* Fixed costs per month in 1/10 USD cent */
+		@Persistent
 		private double fixedCosts;
-
-		public Costs() {
-		}
 
 		public Costs(double variableCosts, double fixedCosts) {
 			this.setVariableCosts(variableCosts);
 			this.setFixedCosts(fixedCosts);
+		}
+
+		/**
+		 * @return the key
+		 */
+		public Key getKey() {
+			return key;
+		}
+
+		/**
+		 * @param key
+		 *            the key to set
+		 */
+		public void setKey(Key key) {
+			this.key = key;
 		}
 
 		public double getVariableCosts() {

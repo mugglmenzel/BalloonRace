@@ -1,32 +1,32 @@
 /*
-* This file is part of IntelliCloudBench.
-*
-* Copyright (c) 2012, Jan Gerlinger <jan.gerlinger@gmx.de>
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-* * Redistributions of source code must retain the above copyright
-* notice, this list of conditions and the following disclaimer.
-* * Redistributions in binary form must reproduce the above copyright
-* notice, this list of conditions and the following disclaimer in the
-* documentation and/or other materials provided with the distribution.
-* * Neither the name of the Institute of Applied Informatics and Formal
-* Description Methods (AIFB) nor the names of its contributors may be used to
-* endorse or promote products derived from this software without specific prior
-* written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * This file is part of IntelliCloudBench.
+ *
+ * Copyright (c) 2012, Jan Gerlinger <jan.gerlinger@gmx.de>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ * * Neither the name of the Institute of Applied Informatics and Formal
+ * Description Methods (AIFB) nor the names of its contributors may be used to
+ * endorse or promote products derived from this software without specific prior
+ * written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package edu.kit.aifb.IntelliCloudBench.model;
 
@@ -74,9 +74,9 @@ public class User implements Serializable, ICredentialsChangedListener {
 	private String locale = null;
 
 	public UIState getUiState() {
-			return ApplicationState.getUIStateForUser(this);
+		return ApplicationState.getUIStateForUser(this);
 	}
-	
+
 	public CloudBenchService getService() {
 		return ApplicationState.getCloudBenchServiceForUser(this);
 	}
@@ -94,169 +94,183 @@ public class User implements Serializable, ICredentialsChangedListener {
 	}
 
 	public String getGivenName() {
-  	return givenName;
-  }
+		return givenName;
+	}
 
 	public String getFamilyName() {
-  	return familyName;
-  }
+		return familyName;
+	}
 
 	public String getLink() {
-  	return link;
-  }
+		return link;
+	}
 
 	public String getGender() {
-  	return gender;
-  }
+		return gender;
+	}
 
 	public String getBirthday() {
-  	return birthday;
-  }
+		return birthday;
+	}
 
 	public String getLocale() {
-  	return locale;
-  }
+		return locale;
+	}
 
-//	private void storeCredentialsForProviderOld() {
-//		Map<String, Credentials> credentialsForProvider = new HashMap<String, Credentials>();
-//		for (Provider provider : getService().getAllProviders()) {
-//			credentialsForProvider.put(provider.getId(), provider.getCredentials());
-//		}
-//		storeObject(KEY_CREDENTIALS, credentialsForProvider);
-//	}
-	//TODO: Verschluesseln!
-	private void storeCredentialsForProvider() {
-		
+	// private void storeCredentialsForProviderOld() {
+	// Map<String, Credentials> credentialsForProvider = new HashMap<String,
+	// Credentials>();
+	// for (Provider provider : getService().getAllProviders()) {
+	// credentialsForProvider.put(provider.getId(), provider.getCredentials());
+	// }
+	// storeObject(KEY_CREDENTIALS, credentialsForProvider);
+	// }
+	private void storeCredentialsForProvider(Provider provider,
+			Credentials credentials) {
+
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
+
 		Map<String, Credentials> credentialsForProvider = new HashMap<String, Credentials>();
-		for (Provider provider : getService().getAllProviders()) {
-			credentialsForProvider.put(provider.getId(), provider.getCredentials());
+		for (Provider p : getService().getAllProviders()) {
+			if (p.equals(provider))
+				credentialsForProvider.put(provider.getId(), credentials);
+			else
+				credentialsForProvider.put(p.getId(), p.getCredentials());
 		}
-		Key credentialsKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+"."+getId());
-		CredentialsObject credentialsObject = new CredentialsObject(credentialsKey, credentialsForProvider);
+
+		Key credentialsKey = KeyFactory.createKey(
+				CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS + "."
+						+ getId());
+		CredentialsObject credentialsObject = new CredentialsObject(
+				credentialsKey, credentialsForProvider);
 		try {
 			pm.makePersistent(credentialsObject);
-			//TODO: nach Debugging entfernen!
-			log.info("Succesfully stored Credentials: "+credentialsForProvider);
-			log.info("Test retrieve: "+loadCredentialsForProvider());
+
 		} finally {
 			pm.close();
 		}
 	}
 
-//	public Map<String, Credentials> loadCredentialsForProviderOld() {
-//		@SuppressWarnings("unchecked")
-//		Map<String, Credentials> credentialsForProvider = (Map<String, Credentials>) loadObject(KEY_CREDENTIALS);
-//		if (credentialsForProvider == null)
-//			credentialsForProvider = new HashMap<String, Credentials>();
-//		return credentialsForProvider;
-//	}
-	
+	// public Map<String, Credentials> loadCredentialsForProviderOld() {
+	// @SuppressWarnings("unchecked")
+	// Map<String, Credentials> credentialsForProvider = (Map<String,
+	// Credentials>) loadObject(KEY_CREDENTIALS);
+	// if (credentialsForProvider == null)
+	// credentialsForProvider = new HashMap<String, Credentials>();
+	// return credentialsForProvider;
+	// }
+
 	public Map<String, Credentials> loadCredentialsForProvider() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Key k = KeyFactory
-				.createKey(CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS+"."+getId());
+		Key k = KeyFactory.createKey(CredentialsObject.class.getSimpleName(),
+				KEY_CREDENTIALS + "." + getId());
 		Map<String, Credentials> credentialsForProvider = null;
-		try{
-			CredentialsObject credentialsObject = pm.getObjectById(CredentialsObject.class, k);
+		try {
+			CredentialsObject credentialsObject = pm.getObjectById(
+					CredentialsObject.class, k);
 			credentialsForProvider = credentialsObject.getCredentials();
-		}
-		catch (Exception e){
+		} catch (Exception e) {
 			log.info("Credentials not found, will create new Map.");
 			credentialsForProvider = new HashMap<String, Credentials>();
 		}
 		return credentialsForProvider;
-		
-	}
-		
 
-//	public void storeLastBenchmarkResultsOld() {
-//		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
-//		storeObject(KEY_RESULTS, resultsForAllBenchmarksForType);
-//	}
-	
+	}
+
+	// public void storeLastBenchmarkResultsOld() {
+	// Map<InstanceType, Multimap<Benchmark, Result>>
+	// resultsForAllBenchmarksForType =
+	// getService().getResultsForAllBenchmarksForType();
+	// storeObject(KEY_RESULTS, resultsForAllBenchmarksForType);
+	// }
+
 	public void storeLastBenchmarkResults() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
-		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService().getResultsForAllBenchmarksForType();
-		
-		Key benchmarksKey = KeyFactory.createKey(CredentialsObject.class.getSimpleName(), KEY_RESULTS+"."+getId());
-		BenchmarksObject benchmarksObject = new BenchmarksObject(benchmarksKey, resultsForAllBenchmarksForType);
+
+		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService()
+				.getResultsForAllBenchmarksForType();
+
+		Key benchmarksKey = KeyFactory.createKey(
+				CredentialsObject.class.getSimpleName(), KEY_RESULTS + "."
+						+ getId());
+		BenchmarksObject benchmarksObject = new BenchmarksObject(benchmarksKey,
+				resultsForAllBenchmarksForType);
 		try {
 			pm.makePersistent(benchmarksObject);
-			//TODO: nach Debugging entfernen!
-			log.info("Succesfully stored Benchmark Results: "+resultsForAllBenchmarksForType);
+			// TODO: nach Debugging entfernen!
+			log.info("Succesfully stored Benchmark Results: "
+					+ resultsForAllBenchmarksForType);
 		} finally {
 			pm.close();
 		}
 	}
 
-	
-//	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResultsOld() {
-//		@SuppressWarnings("unchecked")
-//		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
-//		    (Map<InstanceType, Multimap<Benchmark, Result>>) loadObject(KEY_RESULTS);
-//		return benchmarkResultsForType;
-//	}
-	
+	// public Map<InstanceType, Multimap<Benchmark, Result>>
+	// loadLastBenchmarkResultsOld() {
+	// @SuppressWarnings("unchecked")
+	// Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
+	// (Map<InstanceType, Multimap<Benchmark, Result>>) loadObject(KEY_RESULTS);
+	// return benchmarkResultsForType;
+	// }
+
 	public Map<InstanceType, Multimap<Benchmark, Result>> loadLastBenchmarkResults() {
-		
+
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		
-		Key k = KeyFactory
-				.createKey(BenchmarksObject.class.getSimpleName(), KEY_RESULTS+"."+getId());
-		BenchmarksObject benchmarksObject = pm.getObjectById(BenchmarksObject.class, k);
-		
-		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType =
-		    benchmarksObject.getBenchmarks();
-		
+
+		Key k = KeyFactory.createKey(BenchmarksObject.class.getSimpleName(),
+				KEY_RESULTS + "." + getId());
+		BenchmarksObject benchmarksObject = pm.getObjectById(
+				BenchmarksObject.class, k);
+
+		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType = benchmarksObject
+				.getBenchmarks();
+
 		return benchmarkResultsForType;
 	}
 
-	
-//	private void storeObject(String key, Object object) {
-//		try {
-//			File file = new File("/tmp/" + key + "." + getId());
-//			file.setExecutable(false);
-//			file.setReadable(false);
-//			file.setReadable(true, true);
-//			file.setWritable(false);
-//			file.setWritable(true, true);
-//			FileOutputStream os = new FileOutputStream(file);
-//			ObjectOutput output = new ObjectOutputStream(os);
-//			try {
-//				output.writeObject(object);
-//			} finally {
-//				output.close();
-//			}
-//		} catch (IOException ex) {
-//			ex.printStackTrace();
-//		}
-//	}
-//
-//	private Object loadObject(String key) {
-//		Object object = null;
-//		try {
-//			File file = new File("/tmp/" + key + "." + getId());
-//			InputStream is = new FileInputStream(file);
-//			ObjectInput input = new ObjectInputStream(is);
-//			try {
-//				object = input.readObject();
-//			} finally {
-//				input.close();
-//			}
-//		} catch (ClassNotFoundException ex) {
-//		} catch (IOException ex) {
-//			ex.printStackTrace();
-//		} catch (ClassCastException ex) {
-//			ex.printStackTrace();
-//		}
-//		return object;
-//	}
+	// private void storeObject(String key, Object object) {
+	// try {
+	// File file = new File("/tmp/" + key + "." + getId());
+	// file.setExecutable(false);
+	// file.setReadable(false);
+	// file.setReadable(true, true);
+	// file.setWritable(false);
+	// file.setWritable(true, true);
+	// FileOutputStream os = new FileOutputStream(file);
+	// ObjectOutput output = new ObjectOutputStream(os);
+	// try {
+	// output.writeObject(object);
+	// } finally {
+	// output.close();
+	// }
+	// } catch (IOException ex) {
+	// ex.printStackTrace();
+	// }
+	// }
+	//
+	// private Object loadObject(String key) {
+	// Object object = null;
+	// try {
+	// File file = new File("/tmp/" + key + "." + getId());
+	// InputStream is = new FileInputStream(file);
+	// ObjectInput input = new ObjectInputStream(is);
+	// try {
+	// object = input.readObject();
+	// } finally {
+	// input.close();
+	// }
+	// } catch (ClassNotFoundException ex) {
+	// } catch (IOException ex) {
+	// ex.printStackTrace();
+	// } catch (ClassCastException ex) {
+	// ex.printStackTrace();
+	// }
+	// return object;
+	// }
 
 	@Override
-	public void notifyCredentialsChanged(Provider provider, Credentials credentials) {
-		storeCredentialsForProvider();
+	public void notifyCredentialsChanged(Provider provider,
+			Credentials credentials) {
+		storeCredentialsForProvider(provider, credentials);
 	}
 }

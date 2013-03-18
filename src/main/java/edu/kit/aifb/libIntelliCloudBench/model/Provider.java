@@ -35,11 +35,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.Hardware;
@@ -66,7 +68,7 @@ public class Provider extends Observable implements Serializable {
 		this.name = provider.getName();
 		this.credentials = new Credentials();
 		credentialsListener.put(this,
-				new ArrayList<ICredentialsChangedListener>(1));
+				new ArrayList<ICredentialsChangedListener>());
 	}
 
 	public String getId() {
@@ -82,7 +84,7 @@ public class Provider extends Observable implements Serializable {
 	}
 
 	public boolean areCredentialsSetup() {
-		return (!credentials.getKey().equals("") || !credentials.getSecret()
+		return !(credentials.getKey().equals("") && credentials.getSecret()
 				.equals(""));
 	}
 
@@ -91,6 +93,7 @@ public class Provider extends Observable implements Serializable {
 			loadedAllRegions = false;
 			allRegions.clear();
 		}
+		Logger.getAnonymousLogger().info("Credentials now: " + credentials);
 		for (ICredentialsChangedListener listener : credentialsListener
 				.get(this))
 			if (listener != null)
@@ -186,6 +189,43 @@ public class Provider extends Observable implements Serializable {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		final int maxLen = 5;
+		return "Provider ["
+				+ (id != null ? "id=" + id + ", " : "")
+				+ (name != null ? "name=" + name + ", " : "")
+				+ (credentials != null ? "credentials=" + credentials + ", "
+						: "")
+				+ (allRegions != null ? "allRegions="
+						+ toString(allRegions, maxLen) + ", " : "")
+				+ "loadedAllRegions="
+				+ loadedAllRegions
+				+ ", "
+				+ (allHardwareTypes != null ? "allHardwareTypes="
+						+ toString(allHardwareTypes, maxLen) + ", " : "")
+				+ "loadedAllHardwareTypes=" + loadedAllHardwareTypes + "]";
+	}
+
+	private String toString(Collection<?> collection, int maxLen) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		int i = 0;
+		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext()
+				&& i < maxLen; i++) {
+			if (i > 0)
+				builder.append(", ");
+			builder.append(iterator.next());
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 }

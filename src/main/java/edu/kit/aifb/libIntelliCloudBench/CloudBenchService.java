@@ -37,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.logging.Logger;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
@@ -119,7 +120,8 @@ public class CloudBenchService extends Observable implements Serializable,
 					.viewableAs(ComputeServiceContext.class)) {
 				providers.add(new Provider(provider));
 			}
-		}
+			Logger.getAnonymousLogger().info("created new providers list for service");
+		} else Logger.getAnonymousLogger().info("reused providers list for service");
 		return providers;
 	}
 
