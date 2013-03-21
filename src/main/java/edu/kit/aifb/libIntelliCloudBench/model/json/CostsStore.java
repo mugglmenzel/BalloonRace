@@ -30,21 +30,21 @@
 
 package edu.kit.aifb.libIntelliCloudBench.model.json;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -52,7 +52,6 @@ import com.google.gson.JsonSyntaxException;
 
 import edu.kit.aifb.IntelliCloudBench.model.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.metrics.IMetricsType;
-import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 
 public class CostsStore implements IMetricsType, Serializable {
@@ -138,27 +137,35 @@ public class CostsStore implements IMetricsType, Serializable {
 	}
 
 	private static CostsStore loadCostsStore() {
+		
 		CostsStore costsStore = null;
 
-		//TODO: Finish PM impl for costs
-		/*costsStore = PMF
-				.get()
-				.getPersistenceManager()
-				.getObjectById(Costs.class,
-						KeyFactory.createKey(Costs.class.getSimpleName(), 1));*/
+//		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		/*
-		 * URL costsResourceUrl = Benchmark.class.getResource(costsFilename);
-		 * FileInputStream costsResourceFile = null; try { costsResourceFile =
-		 * new FileInputStream(costsResourceUrl.getFile()); costsStore =
-		 * getGson().fromJson( new InputStreamReader(costsResourceFile),
-		 * CostsStore.class); } catch (FileNotFoundException e) {
-		 * e.printStackTrace(); } catch (JsonIOException e) {
-		 * e.printStackTrace(); } catch (JsonSyntaxException e) {
-		 * e.printStackTrace(); } finally { if (costsResourceFile != null) try {
-		 * costsResourceFile.close(); } catch (IOException e) {
-		 * e.printStackTrace(); } }
-		 */
+		//TODO: Finish PM impl for costs
+//		costsStore = pm.getObjectById(CostsStore.class,
+//				KeyFactory.createKey(Costs.class.getSimpleName(), 1));		
+
+		File f = new File("WEB-INF"+costsFilename);
+		FileInputStream costsResourceFile = null;
+
+		try { 
+			costsResourceFile = new FileInputStream(f);
+			costsStore =
+					getGson().fromJson( new InputStreamReader(costsResourceFile),
+							CostsStore.class); } 
+		catch (FileNotFoundException e) {
+			e.printStackTrace(); } 
+		catch (JsonIOException e) {
+			e.printStackTrace(); } 
+		catch (JsonSyntaxException e) {
+			e.printStackTrace(); } 
+		finally 
+		{ if (costsResourceFile != null) 
+			try {
+				costsResourceFile.close(); } 
+		catch (IOException e) {
+			e.printStackTrace(); } }
 
 		if (costsStore == null)
 			costsStore = new CostsStore();

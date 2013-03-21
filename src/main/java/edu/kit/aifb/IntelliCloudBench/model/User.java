@@ -42,8 +42,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Multimap;
 import com.google.gson.annotations.SerializedName;
 
-import edu.kit.aifb.IntelliCloudBench.model.persistence.BenchmarksObject;
-import edu.kit.aifb.IntelliCloudBench.model.persistence.CredentialsObject;
 import edu.kit.aifb.IntelliCloudBench.model.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.CloudBenchService;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
