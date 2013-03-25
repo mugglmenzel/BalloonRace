@@ -34,10 +34,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -45,14 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -320,25 +315,47 @@ public class Benchmark implements IMetricsType, Serializable {
 
 	private static Map<String, Integer> requestAvgRunTimeForBenchmark() {
 		Map<String, Integer> avgRuntimeForBenchmark = new HashMap<String, Integer>();
+//TODO: IS THIS WORKING PROPERLY?
+		
+//		HttpClient client = new DefaultHttpClient();
+//
+//		HttpPost post = new HttpPost(OPENBENCHMARKING_CLIENT_ENDPOINT);
+//		post.addHeader("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
+//		post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-		HttpClient client = new DefaultHttpClient();
-
-		HttpPost post = new HttpPost(OPENBENCHMARKING_CLIENT_ENDPOINT);
-		post.addHeader("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
-		post.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-		List<NameValuePair> postParams = new ArrayList<NameValuePair>();
-		postParams.add(new BasicNameValuePair("r", "repo_index"));
-		postParams.add(new BasicNameValuePair("client_version", OPENBENCHMARKING_CLIENT_VERSION));
-		postParams.add(new BasicNameValuePair("gsid", OPENBENCHMARKING_CLIENT_GSID));
-		postParams.add(new BasicNameValuePair("repo", "pts"));
+//		List<NameValuePair> postParams = new ArrayList<NameValuePair>();
+//		postParams.add(new BasicNameValuePair("r", "repo_index"));
+//		postParams.add(new BasicNameValuePair("client_version", OPENBENCHMARKING_CLIENT_VERSION));
+//		postParams.add(new BasicNameValuePair("gsid", OPENBENCHMARKING_CLIENT_GSID));
+//		postParams.add(new BasicNameValuePair("repo", "pts"));
 
 		try {
-			post.setEntity(new UrlEncodedFormEntity(postParams, "UTF-8"));
+			
+			String repo_index = URLEncoder.encode("r", "UTF-8") + "=" + URLEncoder.encode("repo_index", "UTF-8");
+			String client_version = URLEncoder.encode("client_version", "UTF-8") + "=" + URLEncoder.encode(OPENBENCHMARKING_CLIENT_VERSION, "UTF-8");
+			String gsid = URLEncoder.encode("gsid", "UTF-8") + "=" + URLEncoder.encode(OPENBENCHMARKING_CLIENT_GSID, "UTF-8");
+			String repo = URLEncoder.encode("repo", "UTF-8") + "=" + URLEncoder.encode("pts", "UTF-8");
+			
+			URL url = new URL(OPENBENCHMARKING_CLIENT_ENDPOINT);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestProperty("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
+			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	 	    conn.setDoOutput(true);
+	 	    conn.setReadTimeout(5000);
+	 	    conn.setRequestMethod("POST");
+	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+			
+			wr.write(repo_index + "&" + client_version + "&" + gsid + "&" + repo);
+	 	    wr.flush();
+	 	    wr.close();
+	 	    
+//			post.setEntity(new UrlEncodedFormEntity(postParams, "UTF-8"));
 
-			HttpResponse response = client.execute(post);
-
-			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+//			HttpResponse response = client.execute(post);
+//
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			conn.setRequestMethod("GET");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
 			try {
 				JsonObject json = new JsonParser().parse(reader).getAsJsonObject();
