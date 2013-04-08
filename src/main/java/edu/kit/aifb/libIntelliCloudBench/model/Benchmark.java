@@ -37,8 +37,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.apache.http.client.ClientProtocolException;
 import org.jdom.Document;
@@ -70,8 +71,7 @@ public class Benchmark implements IMetricsType, Serializable {
 	/* Extracted from a local installation */
 	private static final String OPENBENCHMARKING_CLIENT_GSID = "NNGKDG999";
 
-	private static final String TEST_PROFILE_DIR = File.separator + "test-profiles" + File.separator + "pts"
-	    + File.separator;
+	private static final String TEST_PROFILE_DIR = "test-profiles/pts/";
 
 	/* TODO: Make these lists external */
 	/* Will not work, as we're having headless servers */
@@ -230,7 +230,10 @@ public class Benchmark implements IMetricsType, Serializable {
 		 */
 		SAXBuilder saxBuilder = new SAXBuilder();
 
-		URL testProfileResourceUrl = Benchmark.class.getResource(TEST_PROFILE_DIR);
+		URL testProfileResourceUrl = Benchmark.class.getClassLoader().getResource(TEST_PROFILE_DIR);
+		
+		Logger.getLogger(Benchmark.class.getName()).info(testProfileResourceUrl.getPath());
+		
 		File testProfileResourceDir = new File(testProfileResourceUrl.getFile());
 
 		assert testProfileResourceDir.isDirectory();
@@ -239,7 +242,7 @@ public class Benchmark implements IMetricsType, Serializable {
 			if (testProfileDir.isDirectory()) {
 				try {
 					URL testProfileUrl =
-					    Benchmark.class.getResource(TEST_PROFILE_DIR + File.separator + testProfileDir.getName() + File.separator
+					    Benchmark.class.getClassLoader().getResource(TEST_PROFILE_DIR + "/" + testProfileDir.getName() + "/"
 					        + "test-definition.xml");
 					File file = new File(testProfileUrl.getFile());
 					Document doc = saxBuilder.build(file);
@@ -315,19 +318,6 @@ public class Benchmark implements IMetricsType, Serializable {
 
 	private static Map<String, Integer> requestAvgRunTimeForBenchmark() {
 		Map<String, Integer> avgRuntimeForBenchmark = new HashMap<String, Integer>();
-//TODO: IS THIS WORKING PROPERLY?
-		
-//		HttpClient client = new DefaultHttpClient();
-//
-//		HttpPost post = new HttpPost(OPENBENCHMARKING_CLIENT_ENDPOINT);
-//		post.addHeader("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
-//		post.addHeader("Content-Type", "application/x-www-form-urlencoded");
-
-//		List<NameValuePair> postParams = new ArrayList<NameValuePair>();
-//		postParams.add(new BasicNameValuePair("r", "repo_index"));
-//		postParams.add(new BasicNameValuePair("client_version", OPENBENCHMARKING_CLIENT_VERSION));
-//		postParams.add(new BasicNameValuePair("gsid", OPENBENCHMARKING_CLIENT_GSID));
-//		postParams.add(new BasicNameValuePair("repo", "pts"));
 
 		try {
 			
@@ -337,24 +327,17 @@ public class Benchmark implements IMetricsType, Serializable {
 			String repo = URLEncoder.encode("repo", "UTF-8") + "=" + URLEncoder.encode("pts", "UTF-8");
 			
 			URL url = new URL(OPENBENCHMARKING_CLIENT_ENDPOINT);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			URLConnection conn = url.openConnection();
 			conn.setRequestProperty("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	 	    conn.setDoOutput(true);
 	 	    conn.setReadTimeout(5000);
-	 	    conn.setRequestMethod("POST");
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-			
+	 	    
 			wr.write(repo_index + "&" + client_version + "&" + gsid + "&" + repo);
 	 	    wr.flush();
 	 	    wr.close();
-	 	    
-//			post.setEntity(new UrlEncodedFormEntity(postParams, "UTF-8"));
 
-//			HttpResponse response = client.execute(post);
-//
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			conn.setRequestMethod("GET");
 			BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
 			try {
@@ -363,6 +346,7 @@ public class Benchmark implements IMetricsType, Serializable {
 					int avgRunTime = benchmark.getValue().getAsJsonObject().get("average_run_time").getAsInt();
 					avgRuntimeForBenchmark.put(benchmark.getKey(), avgRunTime);
 				}
+				
 			} catch (NullPointerException e) {
 				e.printStackTrace();
 			}
