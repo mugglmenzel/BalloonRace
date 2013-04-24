@@ -30,6 +30,7 @@
 
 package edu.kit.aifb.IntelliCloudBench.ui.tree;
 
+import java.io.Serializable;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -49,7 +50,7 @@ import com.vaadin.ui.Window.Notification;
 import edu.kit.aifb.libIntelliCloudBench.model.NotReadyException;
 
 public abstract class NodeComponent<T> extends CustomComponent implements PropertySetChangeListener,
-    Button.ClickListener, Observer {
+    Button.ClickListener, Observer, Serializable {
 	private static final long serialVersionUID = -1085233506266253530L;
 
 	private VerticalLayout mainLayout;

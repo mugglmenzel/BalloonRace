@@ -41,6 +41,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -209,6 +210,9 @@ public class Benchmark implements IMetricsType, Serializable {
 	}
 
 	public static Multimap<String, Benchmark> getAllBenchmarks() {
+		
+		Date startBenchmark = new Date();	
+		
 		Multimap<String, Benchmark> benchmarksByType = LinkedListMultimap.create();
 
 		String id;
@@ -227,12 +231,13 @@ public class Benchmark implements IMetricsType, Serializable {
 		/**
 		 * Getting all benchmarks by parsing the test profile XML files from the
 		 * resources directory
-		 */
+		 */	
+		
 		SAXBuilder saxBuilder = new SAXBuilder();
 
 		URL testProfileResourceUrl = Benchmark.class.getClassLoader().getResource(TEST_PROFILE_DIR);
 		
-		Logger.getLogger(Benchmark.class.getName()).info(testProfileResourceUrl.getPath());
+//		Logger.getLogger(Benchmark.class.getName()).info(testProfileResourceUrl.getPath());
 		
 		File testProfileResourceDir = new File(testProfileResourceUrl.getFile());
 
@@ -301,24 +306,31 @@ public class Benchmark implements IMetricsType, Serializable {
 								Integer avgRunTime = avgRunTimeForBenchmark.get(id.split("-(?=[^-]+$)")[0]);
 								Benchmark benchmark = new Benchmark(id, name, description, type, avgRunTime, options, valuesByOption);
 								benchmarksByType.put(type, benchmark);
+								
 							}
 						}
 					}
 
 				} catch (JDOMException e) {
+					Logger.getLogger(Benchmark.class.getName()).info("Exception 1");
 					e.printStackTrace();
 				} catch (IOException e) {
+					Logger.getLogger(Benchmark.class.getName()).info("Exception 2");
 					e.printStackTrace();
 				}
 			}
 		}
-
+		//TODO: Remove
+		Date endBenchmark = new Date();	
+		long result = endBenchmark.getTime()-startBenchmark.getTime();
+		Logger.getLogger(Benchmark.class.getName()).info("Duration getAllBenchmarks:" + result);
+		
 		return benchmarksByType;
 	}
 
 	private static Map<String, Integer> requestAvgRunTimeForBenchmark() {
 		Map<String, Integer> avgRuntimeForBenchmark = new HashMap<String, Integer>();
-
+		Date startAvgRunTime = new Date();
 		try {
 			
 			String repo_index = URLEncoder.encode("r", "UTF-8") + "=" + URLEncoder.encode("repo_index", "UTF-8");
@@ -331,7 +343,7 @@ public class Benchmark implements IMetricsType, Serializable {
 			conn.setRequestProperty("User-Agent", OPENBENCHMARKING_CLIENT_USER_AGENT);
 			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 	 	    conn.setDoOutput(true);
-	 	    conn.setReadTimeout(5000);
+	 	    conn.setReadTimeout(20000);
 	 	    OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 	 	    
 			wr.write(repo_index + "&" + client_version + "&" + gsid + "&" + repo);
@@ -358,6 +370,10 @@ public class Benchmark implements IMetricsType, Serializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		//TODO: Remove
+		Date endAvgRunTime = new Date();	
+		long result = endAvgRunTime.getTime()-startAvgRunTime.getTime();
+		Logger.getLogger(Benchmark.class.getName()).info("Duration requestAvgRunTimeForBenchmark:" + result);
 
 		return avgRuntimeForBenchmark;
 	}

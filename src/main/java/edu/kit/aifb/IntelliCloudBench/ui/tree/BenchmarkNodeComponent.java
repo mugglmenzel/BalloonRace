@@ -30,11 +30,14 @@
 
 package edu.kit.aifb.IntelliCloudBench.ui.tree;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -55,7 +58,7 @@ import edu.kit.aifb.libIntelliCloudBench.metrics.IMetricsType;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.NotReadyException;
 
-public class BenchmarkNodeComponent extends NodeComponent<Collection<Benchmark>> {
+public class BenchmarkNodeComponent extends NodeComponent<Collection<Benchmark>> implements Serializable {
 	private static final long serialVersionUID = -7117550318213468517L;
 
 	private Collection<CheckBox> allLeafs = new HashSet<CheckBox>();
@@ -71,7 +74,12 @@ public class BenchmarkNodeComponent extends NodeComponent<Collection<Benchmark>>
 		super();
 		this.type = type;
 		this.benchmarkSelectionModel = benchmarkSelectionModel;
-		this.benchmarks = benchmarkSelectionModel.getBenchmarksForType(type);
+		//TODO: remove
+		Date startBenchmark = new Date();	
+			this.benchmarks = benchmarkSelectionModel.getBenchmarksForType(type);
+		Date endBenchmark = new Date();	
+		long result = endBenchmark.getTime()-startBenchmark.getTime();
+		Logger.getLogger(Benchmark.class.getName()).info("Duration getBenchmarksForType:" + result);
 
 		if (isOpenedOnStartup())
 			open(true);

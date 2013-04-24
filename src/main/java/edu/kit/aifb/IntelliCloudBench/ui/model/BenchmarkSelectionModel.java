@@ -32,9 +32,11 @@ package edu.kit.aifb.IntelliCloudBench.ui.model;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
+import java.util.logging.Logger;
 
 import edu.kit.aifb.libIntelliCloudBench.metrics.IInstanceOrderer;
 import edu.kit.aifb.libIntelliCloudBench.metrics.IMetricsType;
@@ -43,12 +45,14 @@ import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 import edu.kit.aifb.libIntelliCloudBench.model.json.CostsStore;
 import edu.kit.aifb.libIntelliCloudBench.stopping.StoppingConfiguration;
+import com.google.common.collect.Multimap;
 
 public class BenchmarkSelectionModel extends Observable implements Serializable {
 	private static final long serialVersionUID = 2307408743918878990L;
 
 	private MetricsConfiguration metricsConfiguration;
 	private StoppingConfiguration stoppingConfiguration;
+	private Multimap<String, Benchmark> benchmarks;
 	private List<InstanceType> instanceTypes;
 
 	public BenchmarkSelectionModel(MetricsConfiguration metricsConfiguration, StoppingConfiguration stoppingConfiguration) {
@@ -77,7 +81,12 @@ public class BenchmarkSelectionModel extends Observable implements Serializable 
 	}
 
 	public boolean isOneSelectedOfType(String type) {
-		Collection<? extends IMetricsType> benchmarksForType = Benchmark.getAllBenchmarks().get(type);
+		//TODO: Remove
+		Date startBenchmark = new Date();	
+			Collection<? extends IMetricsType> benchmarksForType = benchmarks.get(type);
+		Date endBenchmark = new Date();	
+		long result = endBenchmark.getTime()-startBenchmark.getTime();
+		Logger.getLogger(Benchmark.class.getName()).info("Duration isOneSelectedOfType" + result);
 		Collection<IMetricsType> intersection = new LinkedList<IMetricsType>(benchmarksForType);
 		intersection.retainAll(getSelected());
 
@@ -85,11 +94,14 @@ public class BenchmarkSelectionModel extends Observable implements Serializable 
 	}
 
 	public Collection<Benchmark> getBenchmarksForType(String type) {
-		return Benchmark.getAllBenchmarks().get(type);
+		return benchmarks.get(type);
 	}
 
 	public Collection<String> getTypes() {
-		return Benchmark.getAllBenchmarks().keySet();
+		this.benchmarks = Benchmark.getAllBenchmarks();
+		// TODO: Remove
+		Logger.getLogger(Benchmark.class.getName()).info("Benchmarks initialized");
+		return benchmarks.keySet();
 	}
 
 	public Class<? extends IInstanceOrderer> getSelectedInstancesOrderer() {
