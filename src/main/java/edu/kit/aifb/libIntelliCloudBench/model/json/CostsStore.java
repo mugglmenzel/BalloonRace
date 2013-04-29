@@ -176,7 +176,7 @@ public class CostsStore implements IMetricsType, Serializable {
 		return gson;
 	}
 
-	@PersistenceCapable
+//	@PersistenceCapable
 	public class Costs implements Serializable {
 		private static final long serialVersionUID = -1632289006194114301L;
 

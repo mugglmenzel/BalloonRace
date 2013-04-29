@@ -14,7 +14,7 @@ import com.google.common.collect.Multimap;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
-
+ 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
 public class BenchmarksObject {
 	@PrimaryKey
