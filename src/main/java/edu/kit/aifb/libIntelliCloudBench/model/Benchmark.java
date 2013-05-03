@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,7 +56,6 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -124,11 +124,11 @@ public class Benchmark implements IMetricsType, Serializable {
 	private String type;
 	private Integer avgRunTime = 0;
 	List<String> options;
-	LinkedListMultimap<String, String> valuesByOption;
+	Map<String, List<String>> valuesByOption;
 	Map<String, Integer> selectedValueForOption = new HashMap<String, Integer>();
 
 	public Benchmark(String id, String name, String description, String type, Integer avgRunTime, List<String> options,
-	    LinkedListMultimap<String, String> valuesByOption) {
+	    Map<String, List<String>> valuesByOption) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -141,7 +141,8 @@ public class Benchmark implements IMetricsType, Serializable {
 		/* Set default selected value */
 		for (String option : options) {
 			List<String> values = valuesByOption.get(option);
-			if (!values.isEmpty()) {
+
+			if (values!=null && !values.isEmpty()) {
 				setSelectedValue(option, values.get(0));
 			}
 		}
@@ -191,11 +192,12 @@ public class Benchmark implements IMetricsType, Serializable {
 
 	public boolean hasOptions() {
 
-		for (String value : valuesByOption.values()) {
-			if (value != null)
-				return true;
+		for (List<String> l : valuesByOption.values()){
+			for (String value : l) {
+				if (value != null)
+					return true;
+			}
 		}
-
 		return false;
 	}
 
@@ -209,18 +211,18 @@ public class Benchmark implements IMetricsType, Serializable {
 		return false;
 	}
 
-	public static Multimap<String, Benchmark> getAllBenchmarks() {
+	public static Map<String, List<Benchmark>> getAllBenchmarks() {
 		
 		Date startBenchmark = new Date();	
 		
-		Multimap<String, Benchmark> benchmarksByType = LinkedListMultimap.create();
-
+		Map<String, List<Benchmark>> benchmarksByType = new HashMap<String, List<Benchmark>>();
+		
 		String id;
 		String name;
 		String description;
 		String type;
 		List<String> options = new LinkedList<String>();
-		LinkedListMultimap<String, String> valuesByOption = LinkedListMultimap.create();
+		Map<String, List<String>> valuesByOption = new HashMap<String, List<String>>();
 
 		/**
 		 * Getting additional info for the benchmarks like average runtime from
@@ -236,8 +238,6 @@ public class Benchmark implements IMetricsType, Serializable {
 		SAXBuilder saxBuilder = new SAXBuilder();
 
 		URL testProfileResourceUrl = Benchmark.class.getClassLoader().getResource(TEST_PROFILE_DIR);
-		
-//		Logger.getLogger(Benchmark.class.getName()).info(testProfileResourceUrl.getPath());
 		
 		File testProfileResourceDir = new File(testProfileResourceUrl.getFile());
 
@@ -259,14 +259,14 @@ public class Benchmark implements IMetricsType, Serializable {
 					if (testInformationChild != null) {
 						name = testInformationChild.getChildTextNormalize("Title");
 						description = testInformationChild.getChildTextNormalize("Description");
-
+						
 						if (name != null) {
 							Element testProfileChild = rootElement.getChild("TestProfile");
-							type = testProfileChild.getChildTextNormalize("TestType");
+							type = testProfileChild.getChildTextNormalize("TestType");						
 
 							if (!Arrays.asList(TYPE_BLACKLIST).contains(type) && !Arrays.asList(BENCHMARK_BLACKLIST).contains(id)) {
 
-								valuesByOption = LinkedListMultimap.create();
+								valuesByOption = new HashMap <String, List<String>>();
 								Element testSettingsChild = rootElement.getChild("TestSettings");
 
 								if (testSettingsChild != null) {
@@ -278,6 +278,7 @@ public class Benchmark implements IMetricsType, Serializable {
 										for (Element optionsNode : optionsNodes) {
 											/* Option */
 											String optionName = optionsNode.getChildTextNormalize("DisplayName");
+											valuesByOption.put(optionName, new ArrayList<String>());
 											/*
 											 * There are options without predefined values in PTS
 											 * tests, so we can already add it here, even if there are
@@ -295,7 +296,7 @@ public class Benchmark implements IMetricsType, Serializable {
 													} else {
 														valueText = valueNode.getChildTextNormalize("Name");
 													}
-													valuesByOption.put(optionName, valueText);
+													valuesByOption.get(optionName).add(valueText);
 												}
 											}
 										}
@@ -305,8 +306,13 @@ public class Benchmark implements IMetricsType, Serializable {
 								/* Strip the version info from the id */
 								Integer avgRunTime = avgRunTimeForBenchmark.get(id.split("-(?=[^-]+$)")[0]);
 								Benchmark benchmark = new Benchmark(id, name, description, type, avgRunTime, options, valuesByOption);
-								benchmarksByType.put(type, benchmark);
-								
+							
+								List<Benchmark> benchmarkList = benchmarksByType.get(type);
+							    if(benchmarkList == null) {
+							    	benchmarkList = new ArrayList<Benchmark>();
+							        benchmarksByType.put(type, benchmarkList);
+							    }
+							    benchmarkList.add(benchmark);
 							}
 						}
 					}

@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.logging.Logger;
 
@@ -45,14 +46,13 @@ import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 import edu.kit.aifb.libIntelliCloudBench.model.json.CostsStore;
 import edu.kit.aifb.libIntelliCloudBench.stopping.StoppingConfiguration;
-import com.google.common.collect.Multimap;
 
 public class BenchmarkSelectionModel extends Observable implements Serializable {
 	private static final long serialVersionUID = 2307408743918878990L;
 
 	private MetricsConfiguration metricsConfiguration;
 	private StoppingConfiguration stoppingConfiguration;
-	private Multimap<String, Benchmark> benchmarks;
+	private Map<String, List<Benchmark>> benchmarks;
 	private List<InstanceType> instanceTypes;
 
 	public BenchmarkSelectionModel(MetricsConfiguration metricsConfiguration, StoppingConfiguration stoppingConfiguration) {
@@ -100,7 +100,7 @@ public class BenchmarkSelectionModel extends Observable implements Serializable 
 	public Collection<String> getTypes() {
 		this.benchmarks = Benchmark.getAllBenchmarks();
 		// TODO: Remove
-		Logger.getLogger(Benchmark.class.getName()).info("Benchmarks initialized");
+		Logger.getLogger(Benchmark.class.getName()).info("Benchmarks initialized: "+ benchmarks);
 		return benchmarks.keySet();
 	}
 
