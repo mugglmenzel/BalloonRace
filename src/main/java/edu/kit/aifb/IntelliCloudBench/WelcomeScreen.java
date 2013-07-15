@@ -1,32 +1,32 @@
 /*
- * This file is part of IntelliCloudBench.
- *
- * Copyright (c) 2012, Jan Gerlinger <jan.gerlinger@gmx.de>
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- * * Neither the name of the Institute of Applied Informatics and Formal
- * Description Methods (AIFB) nor the names of its contributors may be used to
- * endorse or promote products derived from this software without specific prior
- * written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+* This file is part of IntelliCloudBench.
+*
+* Copyright (c) 2012, Jan Gerlinger <jan.gerlinger@gmx.de>
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+* * Redistributions of source code must retain the above copyright
+* notice, this list of conditions and the following disclaimer.
+* * Redistributions in binary form must reproduce the above copyright
+* notice, this list of conditions and the following disclaimer in the
+* documentation and/or other materials provided with the distribution.
+* * Neither the name of the Institute of Applied Informatics and Formal
+* Description Methods (AIFB) nor the names of its contributors may be used to
+* endorse or promote products derived from this software without specific prior
+* written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+* DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+* DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+* ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package edu.kit.aifb.IntelliCloudBench;
 
@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+
 import org.vaadin.artur.icepush.ICEPush;
 
 import com.google.common.collect.Multimap;
@@ -73,13 +74,11 @@ import edu.kit.aifb.libIntelliCloudBench.model.json.CostsStore;
 import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
 
 @SuppressWarnings("serial")
-public class WelcomeScreen extends Application implements Observer,
-		IOAuthListener {
+public class WelcomeScreen extends Application implements Observer, IOAuthListener {
 	private static final String THEME = "custom";
 
-	private Window window = new Window(
-			"Balloon Race Ride - Intelligent Cloud Service Benchmarking",
-			new VerticalLayout());
+	private Window window =
+	    new Window("Balloon Race Ride - Intelligent Cloud Service Benchmarking Test", new VerticalLayout());
 	private ICEPush pusher;
 
 	private OAuthHandler handler;
@@ -91,28 +90,24 @@ public class WelcomeScreen extends Application implements Observer,
 
 	private Panel panel;
 
-
 	private ClickListener nextListener = new ClickListener() {
 
 		@Override
 		public void buttonClick(ClickEvent event) {
-			
 			saveState();
 
 			UIState uiState = user.getUiState();
 			switch (uiState.getCurrentScreen()) {
 			case PROVIDERS:
 			default:
-				Collection<InstanceType> checkedInstanceTypes = ((ServiceSelectionPanel) panel)
-						.getCheckedInstanceTypes();
+				Collection<InstanceType> checkedInstanceTypes = ((ServiceSelectionPanel) panel).getCheckedInstanceTypes();
 				if (checkedInstanceTypes.size() == 0) {
 					showWarningMessage("Please select at least one service.");
 					return;
 				}
 				break;
 			case BENCHMARKS:
-				int numSelected = uiState.getBenchmarkSelectionModel()
-						.getNumberOfSelectedBenchmarks();
+				int numSelected = uiState.getBenchmarkSelectionModel().getNumberOfSelectedBenchmarks();
 				if (numSelected < 1) {
 					showWarningMessage("Please select at least one benchmark.");
 					return;
@@ -129,8 +124,7 @@ public class WelcomeScreen extends Application implements Observer,
 		}
 
 		private void showWarningMessage(String message) {
-			WelcomeScreen.this.getMainWindow().showNotification(message,
-					Notification.TYPE_WARNING_MESSAGE);
+			WelcomeScreen.this.getMainWindow().showNotification(message, Notification.TYPE_WARNING_MESSAGE);
 		}
 
 	};
@@ -162,20 +156,12 @@ public class WelcomeScreen extends Application implements Observer,
 
 	private Embedded logoBox;
 
-	
-	
-	
-	public WelcomeScreen() {
-		super();
-	}
-
 	public void saveState() {
 		UIState uiState = user.getUiState();
 		switch (uiState.getCurrentScreen()) {
 		case PROVIDERS:
 		default:
-			uiState.setCheckedInstanceTypes(((ServiceSelectionPanel) panel)
-					.getCheckedInstanceTypes());
+			uiState.setCheckedInstanceTypes(((ServiceSelectionPanel) panel).getCheckedInstanceTypes());
 			break;
 		case RUNS:
 			user.getService().terminateAllImmediately();
@@ -197,8 +183,7 @@ public class WelcomeScreen extends Application implements Observer,
 		((VerticalLayout) window.getContent()).setSpacing(true);
 		((VerticalLayout) window.getContent()).setMargin(true);
 
-		FileResource logo = new FileResource(new File(Application.class
-				.getResource("/logo.svg").getFile()), this);
+		FileResource logo = new FileResource(new File(Application.class.getResource("/logo.svg").getFile().replace("%20", " ")), this);
 		logoBox = new Embedded();
 		logoBox.setSource(logo);
 		logoBox.setType(Embedded.TYPE_IMAGE);
@@ -219,8 +204,7 @@ public class WelcomeScreen extends Application implements Observer,
 		}
 
 		window.addComponent(footer);
-		((VerticalLayout) window.getContent()).setComponentAlignment(footer,
-				Alignment.BOTTOM_CENTER);
+		((VerticalLayout) window.getContent()).setComponentAlignment(footer, Alignment.BOTTOM_CENTER);
 		setMainWindow(window);
 	}
 
@@ -228,8 +212,7 @@ public class WelcomeScreen extends Application implements Observer,
 		HorizontalLayout footer = new HorizontalLayout();
 		footer.setSpacing(true);
 
-		FileResource eOrg = new FileResource(new File(Application.class
-				.getResource("/eOrg.png").getFile()), this);
+		FileResource eOrg = new FileResource(new File(Application.class.getResource("/eOrg.png").getFile().replace("%20", " ")), this);
 		Link eOrgLink = new Link();
 		eOrgLink.setIcon(eOrg);
 		eOrgLink.setResource(new ExternalResource("http://eorganization.de"));
@@ -237,8 +220,7 @@ public class WelcomeScreen extends Application implements Observer,
 		eOrgLink.setStyleName("footer");
 		footer.addComponent(eOrgLink);
 
-		FileResource aifb = new FileResource(new File(Application.class
-				.getResource("/aifb.png").getFile()), this);
+		FileResource aifb = new FileResource(new File(Application.class.getResource("/aifb.png").getFile().replace("%20", " ")), this);
 		Link aifbLink = new Link();
 		aifbLink.setIcon(aifb);
 		aifbLink.setResource(new ExternalResource("http://aifb.kit.edu"));
@@ -246,8 +228,8 @@ public class WelcomeScreen extends Application implements Observer,
 		aifbLink.setStyleName("footer");
 		footer.addComponent(aifbLink);
 
-		FileResource kit = new FileResource(new File(Application.class
-				.getResource("/kit_logo_en_farbe_positiv.png").getFile()), this);
+		FileResource kit =
+		    new FileResource(new File(Application.class.getResource("/kit_logo_en_farbe_positiv.png").getFile().replace("%20", " ")), this);
 		Link kitLink = new Link();
 		kitLink.setIcon(kit);
 		kitLink.setResource(new ExternalResource("http://kit.edu"));
@@ -267,9 +249,7 @@ public class WelcomeScreen extends Application implements Observer,
 			nextButton.setVisible(true);
 			previousButton.setVisible(false);
 			if (!(panel instanceof ServiceSelectionPanel))
-				panel = new ServiceSelectionPanel(
-						"Please select the Cloud Services you want to compare...",
-						user);
+				panel = new ServiceSelectionPanel("Please select the Cloud Services you want to compare...", user);
 			break;
 		case BENCHMARKS:
 			nextButton.setCaption("Start benchmarking");
@@ -277,15 +257,10 @@ public class WelcomeScreen extends Application implements Observer,
 			previousButton.setCaption("Back to Service Selection");
 			previousButton.setVisible(true);
 			if (!(panel instanceof BenchmarkSelectionPanel)) {
-				BenchmarkSelectionModel benchmarkSelectionModel = user
-						.getUiState().getBenchmarkSelectionModel();
-				user.getService().setMetricsConfiguration(
-						benchmarkSelectionModel.getMetricsConfiguration());
-				user.getService().setStoppingConfiguration(
-						benchmarkSelectionModel.getStoppingConfiguration());
-				panel = new BenchmarkSelectionPanel(
-						"Please select the Benchmarks you want to run...",
-						benchmarkSelectionModel);
+				BenchmarkSelectionModel benchmarkSelectionModel = user.getUiState().getBenchmarkSelectionModel();
+				user.getService().setMetricsConfiguration(benchmarkSelectionModel.getMetricsConfiguration());
+				user.getService().setStoppingConfiguration(benchmarkSelectionModel.getStoppingConfiguration());
+				panel = new BenchmarkSelectionPanel("Please select the Benchmarks you want to run...", benchmarkSelectionModel);
 			}
 			break;
 		case RUNS:
@@ -293,26 +268,23 @@ public class WelcomeScreen extends Application implements Observer,
 			previousButton.setCaption("Terminate all instances!");
 			previousButton.setVisible(true);
 			if (!(panel instanceof RunningBenchmarksPanel))
-				panel = new RunningBenchmarksPanel("Running Benchmarks...",
-						user);
+				panel = new RunningBenchmarksPanel("Running Benchmarks...", user);
 			user.getService().addObserver(this);
 			break;
 		case RESULTS:
 			nextButton.setVisible(false);
 			previousButton.setCaption("Start all over again...");
 			previousButton.setVisible(true);
-			panel = new ShowResultsPanel("Benchmarking results",
-					user.getService(), user.getUiState());
+			panel = new ShowResultsPanel("Benchmarking results", user.getService(), user.getUiState());
 			break;
 		}
 		panel.setWidth("100%");
 		window.getContent().replaceComponent(oldPanel, panel);
 		user.getUiState().setPanel(panel);
-//		pusher.push();
+		pusher.push();
 
 		if (user.getUiState().getCurrentScreen() == Screen.RUNS)
-			((RunningBenchmarksPanel) panel)
-					.initAndStartBenchmarking(BenchmarkRunner.class);
+			((RunningBenchmarksPanel) panel).initAndStartBenchmarking(BenchmarkRunner.class);
 	}
 
 	private void initLoginWindow() {
@@ -329,26 +301,20 @@ public class WelcomeScreen extends Application implements Observer,
 		spacer.setHeight("40px");
 		loginBox.addComponent(spacer);
 
-		Button loginButton = new Button("Login with Google",
-				new ClickListener() {
+		Button loginButton = new Button("Login with Google", new ClickListener() {
 
-					@Override
-					public void buttonClick(ClickEvent event) {
-						
-						if (handler == null) {
-							handler = new OAuthHandler(WelcomeScreen.this,
-									WelcomeScreen.this.window.getURL()
-											.toString());
-							WelcomeScreen.this.window
-									.addParameterHandler(handler);
-						}
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if (handler == null) {
+					handler = new OAuthHandler(WelcomeScreen.this, WelcomeScreen.this.window.getURL().toString());
+					WelcomeScreen.this.window.addParameterHandler(handler);
+				}
 
-						/* Send user to google to authenticate */
-						WelcomeScreen.this.window.open(new ExternalResource(
-								handler.getRedirectUrl()));
-					}
+				/* Send user to google to authenticate */
+				WelcomeScreen.this.window.open(new ExternalResource(handler.getRedirectUrl()));
+			}
 
-				});
+		});
 		loginButton.setStyleName("big");
 		loginButton.setWidth("-1px");
 		loginBox.addComponent(loginButton);
@@ -368,9 +334,7 @@ public class WelcomeScreen extends Application implements Observer,
 		logoBox.setHeight("120px");
 		header.addComponent(logoBox);
 
-		//Potentieller Error, wenn User kein Bild hinterlegt hat --> fixen!
-		Component userInfo = new UserInfoBox(user.getName(),
-				user.getPictureUrl());
+		Component userInfo = new UserInfoBox(user.getName(), user.getPictureUrl());
 		header.addComponent(userInfo);
 		header.setComponentAlignment(userInfo, Alignment.TOP_RIGHT);
 
@@ -394,38 +358,31 @@ public class WelcomeScreen extends Application implements Observer,
 		buttons.setComponentAlignment(nextButton, Alignment.TOP_CENTER);
 
 		window.addComponent(buttons);
-		((VerticalLayout) window.getContent()).setComponentAlignment(buttons,
-				Alignment.TOP_CENTER);
+		((VerticalLayout) window.getContent()).setComponentAlignment(buttons, Alignment.TOP_CENTER);
 
 		// panel = user.getUiState().getPanel();
 		// if (panel == null)
 		panel = new Panel();
 		panel.setWidth("100%");
 		window.addComponent(panel);
-		((VerticalLayout) window.getContent()).setComponentAlignment(panel,
-				Alignment.TOP_CENTER);
+		((VerticalLayout) window.getContent()).setComponentAlignment(panel, Alignment.TOP_CENTER);
 
 		final HorizontalLayout debugButtons = new HorizontalLayout();
 
-		Button lastResultsButton = new Button(
-				"Load last results (does NOT terminate running machines!)");
+		Button lastResultsButton = new Button("Load last results (does NOT terminate running machines!)");
 		lastResultsButton.addListener(new ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				/* Load saved results */
-				Map<InstanceType, Multimap<Benchmark, Result>> lastBenchmarkResults = user
-						.loadLastBenchmarkResults();
+				Map<InstanceType, Multimap<Benchmark, Result>> lastBenchmarkResults = user.loadLastBenchmarkResults();
 				if (lastBenchmarkResults != null) {
-					user.getService().setBenchmarkResultsForType(
-							lastBenchmarkResults);
+					user.getService().setBenchmarkResultsForType(lastBenchmarkResults);
 					/* Jump to results screen */
 					user.getUiState().setScreen(Screen.RESULTS);
 					updateContent();
 				} else {
-					getMainWindow().showNotification(
-							"Could not load old benchmark results.",
-							Notification.TYPE_WARNING_MESSAGE);
+					getMainWindow().showNotification("Could not load old benchmark results.", Notification.TYPE_WARNING_MESSAGE);
 				}
 			}
 
@@ -437,11 +394,8 @@ public class WelcomeScreen extends Application implements Observer,
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				getMainWindow().showNotification(
-						"Dumped costs store:\n"
-								+ CostsStore.dumpCostsStore(CostsStore
-										.getInstance()),
-						Notification.TYPE_HUMANIZED_MESSAGE);
+				CostsStore.dumpCostsStore(CostsStore.getInstance());
+				getMainWindow().showNotification("Dumped costs store to /tmp/costs.json", Notification.TYPE_HUMANIZED_MESSAGE);
 			}
 
 		});
@@ -475,13 +429,13 @@ public class WelcomeScreen extends Application implements Observer,
 	public void setErrorMessage(String message) {
 		window.removeParameterHandler(handler);
 		handler = null;
-		getMainWindow().showNotification("Error on logging in: " + message,
-				Notification.TYPE_ERROR_MESSAGE);
+		getMainWindow().showNotification("Error on logging in: " + message, Notification.TYPE_ERROR_MESSAGE);
 	}
 
 	/* Gets called when all benchmarks are done */
 	@Override
 	public void update(Observable arg0, Object arg1) {
+		
 		/* Store last results permanently */
 		user.storeLastBenchmarkResults();
 

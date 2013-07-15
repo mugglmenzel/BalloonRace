@@ -1,29 +1,38 @@
-/* Copyright (c) 2009 Google Inc.
+/* Copyright (c) 2013 Robin Hoffmann
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package edu.kit.aifb.IntelliCloudBench.model.persistence;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 
-public final class PMF {
-  private static final PersistenceManagerFactory pmfInstance =
-    JDOHelper.getPersistenceManagerFactory("transactions-optional");
 
-  private PMF() {}
+public final class PMF {
+	//TODO: Let Beanstalk take care of this data, see below
+	private static PersistenceManagerFactory pmfInstance;
+
+//Beanstalk specific data
+//	private String dbName = System.getProperty("RDS_DB_NAME"); 
+//	private String userName = System.getProperty("RDS_USERNAME"); 
+//	private String password = System.getProperty("RDS_PASSWORD"); 
+//	private String hostname = System.getProperty("RDS_HOSTNAME");
+//	private String port = System.getProperty("RDS_PORT");
 
   public static PersistenceManagerFactory get() {
+//	  String jdbcUrl = "jdbc:mysql://" + hostname + ":" + port + "/" + dbName + "?user=" + userName + "&password=" + password;
+//	  
+//	  properties.setProperty("javax.jdo.PersistenceManagerFactoryClass",
+//	                  "org.datanucleus.api.jdo.JDOPersistenceManagerFactory");
+//	  properties.setProperty("javax.jdo.option.ConnectionDriverName","com.mysql.jdbc.Driver");
+//	  properties.setProperty("javax.jdo.option.ConnectionURL", jdbcUrl);
+//	  properties.setProperty("javax.jdo.option.ConnectionUserName", userName);
+//	  properties.setProperty("javax.jdo.option.ConnectionPassword", password);
+//	  properties.setProperty("datanucleus.autoCreateTables", "true");
+//	  pmfInstance = JDOHelper.getPersistenceManagerFactory(properties);
+	  
+	  pmfInstance = JDOHelper
+				.getPersistenceManagerFactory("datanucleus.properties");
+	  
     return pmfInstance;
   }
 }

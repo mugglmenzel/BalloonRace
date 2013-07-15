@@ -42,7 +42,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-import edu.kit.aifb.IntelliCloudBench.model.ApplicationState;
 import edu.kit.aifb.libIntelliCloudBench.model.HardwareType;
 import edu.kit.aifb.libIntelliCloudBench.model.InstanceType;
 import edu.kit.aifb.libIntelliCloudBench.model.NotReadyException;
@@ -57,13 +56,16 @@ public class RegionNodeComponent extends NodeComponent<Region> {
 	private Collection<HardwareTypeLeafComponent> allLeafs = new HashSet<HardwareTypeLeafComponent>();
 	private Collection<InstanceType> checked;
 
+	private ComputeServiceContext context;
+
 	private Label langCodeLabel;
 
 	private Label scopeLabel;
 
-	public RegionNodeComponent(ProviderNodeComponent parent, BeanItem<Region> model,
+	public RegionNodeComponent(ComputeServiceContext context, ProviderNodeComponent parent, BeanItem<Region> model,
 	    Collection<InstanceType> checked) {
 		super(model);
+		this.context = context;
 		this.parent = parent;
 		this.checked = checked;
 	}
@@ -105,7 +107,7 @@ public class RegionNodeComponent extends NodeComponent<Region> {
 	@Override
 	void addSubTreeElements(VerticalLayout subTreeLayout) throws NotReadyException {
 
-		Iterable<HardwareType> allHardwareTypes = parent.getModelBean().getAllHardwareTypes(parent.getService(), this);
+		Iterable<HardwareType> allHardwareTypes = parent.getModelBean().getAllHardwareTypes(context, this);
 		HardwareTypeLeafComponent name;
 		BeanItem<HardwareType> model;
 		InstanceType instanceType;

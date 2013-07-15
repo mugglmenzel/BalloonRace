@@ -36,12 +36,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
+import javax.jdo.Transaction;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Multimap;
 import com.google.gson.annotations.SerializedName;
 
+import edu.kit.aifb.IntelliCloudBench.model.persistence.BenchmarksObject;
+import edu.kit.aifb.IntelliCloudBench.model.persistence.CredentialsObject;
 import edu.kit.aifb.IntelliCloudBench.model.persistence.PMF;
 import edu.kit.aifb.libIntelliCloudBench.CloudBenchService;
 import edu.kit.aifb.libIntelliCloudBench.model.Benchmark;
@@ -53,10 +54,9 @@ import edu.kit.aifb.libIntelliCloudBench.model.xml.Result;
 
 public class User implements Serializable, ICredentialsChangedListener {
 	private static final long serialVersionUID = 1515385475851375669L;
-	private static Logger log = Logger.getLogger(User.class.getName());
-
 	private static final String KEY_CREDENTIALS = "credentials";
 	private static final String KEY_RESULTS = "results";
+	private static Logger log = Logger.getLogger(User.class.getName());
 
 	private String id = null;
 	private String name = null;
@@ -66,7 +66,7 @@ public class User implements Serializable, ICredentialsChangedListener {
 	private String familyName = null;
 	private String link = null;
 	@SerializedName("picture")
-	private String pictureUrl = "http://cdn.dotmed.com/images/discussions/profiles/no_profile.png";
+	private String pictureUrl = null;
 	private String gender = null;
 	private String birthday = null;
 	private String locale = null;
@@ -115,14 +115,6 @@ public class User implements Serializable, ICredentialsChangedListener {
 		return locale;
 	}
 
-	// private void storeCredentialsForProviderOld() {
-	// Map<String, Credentials> credentialsForProvider = new HashMap<String,
-	// Credentials>();
-	// for (Provider provider : getService().getAllProviders()) {
-	// credentialsForProvider.put(provider.getId(), provider.getCredentials());
-	// }
-	// storeObject(KEY_CREDENTIALS, credentialsForProvider);
-	// }
 	private void storeCredentialsForProvider(Provider provider,
 			Credentials credentials) {
 
@@ -136,18 +128,32 @@ public class User implements Serializable, ICredentialsChangedListener {
 				credentialsForProvider.put(p.getId(), p.getCredentials());
 		}
 
-		Key credentialsKey = KeyFactory.createKey(
-				CredentialsObject.class.getSimpleName(), KEY_CREDENTIALS + "."
-						+ getId());
-		CredentialsObject credentialsObject = new CredentialsObject(
-				credentialsKey, credentialsForProvider);
+		String credentialsKey = CredentialsObject.class.getSimpleName()+"."+KEY_CREDENTIALS + "."
+				+ getId();
+
+		CredentialsObject credentialsObject = null;
+
+		Transaction tx = pm.currentTransaction();
 		try {
+			tx.begin();
+			try{
+				credentialsObject = pm.getObjectById(CredentialsObject.class, credentialsKey);
+				credentialsObject.setCredentials(credentialsForProvider);
+			}
+			catch (Exception e) {
+				credentialsObject =	new CredentialsObject(credentialsKey, credentialsForProvider);
+			}
 			pm.makePersistent(credentialsObject);
 
+			tx.commit();
 		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
 			pm.close();
 		}
 	}
+
 
 	// public Map<String, Credentials> loadCredentialsForProviderOld() {
 	// @SuppressWarnings("unchecked")
@@ -160,17 +166,27 @@ public class User implements Serializable, ICredentialsChangedListener {
 
 	public Map<String, Credentials> loadCredentialsForProvider() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Key k = KeyFactory.createKey(CredentialsObject.class.getSimpleName(),
-				KEY_CREDENTIALS + "." + getId());
+		String k = CredentialsObject.class.getSimpleName()+"."+
+				KEY_CREDENTIALS + "." + getId();
 		Map<String, Credentials> credentialsForProvider = null;
+		Transaction tx = pm.currentTransaction();
+
 		try {
+			tx.begin();
 			CredentialsObject credentialsObject = pm.getObjectById(
 					CredentialsObject.class, k);
 			credentialsForProvider = credentialsObject.getCredentials();
-		} catch (Exception e) {
-			log.info("Credentials not found, will create new Map.");
+			tx.commit();
+		}
+		catch (Exception e) {
 			credentialsForProvider = new HashMap<String, Credentials>();
 		}
+		finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		} 
 		return credentialsForProvider;
 
 	}
@@ -185,20 +201,34 @@ public class User implements Serializable, ICredentialsChangedListener {
 	public void storeLastBenchmarkResults() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
+		//TODO: Anscheinend werden Ergebnisse nicht korrekt weitergegeben
 		Map<InstanceType, Multimap<Benchmark, Result>> resultsForAllBenchmarksForType = getService()
 				.getResultsForAllBenchmarksForType();
 
-		Key benchmarksKey = KeyFactory.createKey(
-				CredentialsObject.class.getSimpleName(), KEY_RESULTS + "."
-						+ getId());
-		BenchmarksObject benchmarksObject = new BenchmarksObject(benchmarksKey,
-				resultsForAllBenchmarksForType);
+		String benchmarksKey = BenchmarksObject.class.getSimpleName()+"."+KEY_RESULTS + "."
+				+ getId();
+
+		BenchmarksObject benchmarksObject = null;
+
+		Transaction tx = pm.currentTransaction();
 		try {
+			tx.begin();
+			try{
+				benchmarksObject = pm.getObjectById(BenchmarksObject.class, benchmarksKey);
+				benchmarksObject.setBenchmarks(resultsForAllBenchmarksForType);
+			}
+			catch (Exception e) {
+				benchmarksObject =	new BenchmarksObject(benchmarksKey, resultsForAllBenchmarksForType);
+			}
 			pm.makePersistent(benchmarksObject);
+			tx.commit();
 			// TODO: nach Debugging entfernen!
-			log.info("Succesfully stored Benchmark Results: "
+			log.info("Succesfully stored Benchmark Results for Key "+benchmarksKey+": "
 					+ resultsForAllBenchmarksForType);
 		} finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
 			pm.close();
 		}
 	}
@@ -215,60 +245,31 @@ public class User implements Serializable, ICredentialsChangedListener {
 
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 
-		Key k = KeyFactory.createKey(BenchmarksObject.class.getSimpleName(),
-				KEY_RESULTS + "." + getId());
-		BenchmarksObject benchmarksObject = pm.getObjectById(
-				BenchmarksObject.class, k);
+		String k = BenchmarksObject.class.getSimpleName()+"."+KEY_RESULTS + "." + getId();
+		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType = null;
+		Transaction tx = pm.currentTransaction();
 
-		Map<InstanceType, Multimap<Benchmark, Result>> benchmarkResultsForType = benchmarksObject
-				.getBenchmarks();
-
+		try {
+			tx.begin();
+			BenchmarksObject benchmarksObject = pm.getObjectById(
+					BenchmarksObject.class, k);
+			benchmarkResultsForType = benchmarksObject.getBenchmarks();
+			tx.commit();
+		}
+		catch (Exception e) {
+			benchmarkResultsForType = new HashMap<InstanceType, Multimap<Benchmark, Result>>();
+		}
+		finally {
+			if (tx.isActive()) {
+				tx.rollback();
+			}
+			pm.close();
+		} 
 		return benchmarkResultsForType;
 	}
 
-	// private void storeObject(String key, Object object) {
-	// try {
-	// File file = new File("/tmp/" + key + "." + getId());
-	// file.setExecutable(false);
-	// file.setReadable(false);
-	// file.setReadable(true, true);
-	// file.setWritable(false);
-	// file.setWritable(true, true);
-	// FileOutputStream os = new FileOutputStream(file);
-	// ObjectOutput output = new ObjectOutputStream(os);
-	// try {
-	// output.writeObject(object);
-	// } finally {
-	// output.close();
-	// }
-	// } catch (IOException ex) {
-	// ex.printStackTrace();
-	// }
-	// }
-	//
-	// private Object loadObject(String key) {
-	// Object object = null;
-	// try {
-	// File file = new File("/tmp/" + key + "." + getId());
-	// InputStream is = new FileInputStream(file);
-	// ObjectInput input = new ObjectInputStream(is);
-	// try {
-	// object = input.readObject();
-	// } finally {
-	// input.close();
-	// }
-	// } catch (ClassNotFoundException ex) {
-	// } catch (IOException ex) {
-	// ex.printStackTrace();
-	// } catch (ClassCastException ex) {
-	// ex.printStackTrace();
-	// }
-	// return object;
-	// }
-
 	@Override
-	public void notifyCredentialsChanged(Provider provider,
-			Credentials credentials) {
+	public void notifyCredentialsChanged(Provider provider, Credentials credentials) {
 		storeCredentialsForProvider(provider, credentials);
 	}
 }

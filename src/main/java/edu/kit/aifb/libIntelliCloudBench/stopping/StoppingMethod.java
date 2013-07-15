@@ -1,6 +1,5 @@
 package edu.kit.aifb.libIntelliCloudBench.stopping;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;

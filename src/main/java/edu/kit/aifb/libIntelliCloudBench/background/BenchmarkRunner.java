@@ -71,6 +71,7 @@ public class BenchmarkRunner extends Runner {
 	private static final String TEMPLATE_OS_VERSION = "12.04";
 
 	private static final String PTS_DIR_NAME = "phoronix-test-suite";
+	private static final String PTS_DIR_VERSION ="4.0.1";
 	private static final String PTS_DEPLOYMENT_PATH = "/opt";
 	private static final String PTS_EXECUTABLE = "phoronix-test-suite";
 	private static final String PTS_CONFIG_DIR_NAME = ".phoronix-test-suite";
@@ -99,7 +100,7 @@ public class BenchmarkRunner extends Runner {
 	private static final String[] DEPLOY_PTS_COMMANDS = {
 	    "sudo mkdir " + PTS_DEPLOYMENT_PATH,
 	    "sudo mkdir " + PTS_CONFIG_DEPLOYMENT_PATH,
-	    "sudo tar xvfz /tmp/" + PTS_DIR_NAME + ".tar.gz -C " + PTS_DEPLOYMENT_PATH,
+	    "sudo tar xvfz /tmp/" + PTS_DIR_NAME +"-"+PTS_DIR_VERSION+ ".tar.gz -C " + PTS_DEPLOYMENT_PATH,
 	    "sudo tar xvfz /tmp/" + PTS_CONFIG_DIR_NAME + ".tar.gz -C " + PTS_CONFIG_DEPLOYMENT_PATH,
 	    "sudo chown -R root:root " + PTS_CONFIG_DEPLOYMENT_PATH + "/" };
 
@@ -207,14 +208,14 @@ public class BenchmarkRunner extends Runner {
 	}
 
 	@Override
-	LinkedListMultimap<Benchmark, Result> upload(Benchmark benchmark) {
+	LinkedListMultimap<Benchmark, Result> upload(Benchmark benchmark) throws ParseXmlResultException, RunScriptOnMachineException {
 		try {
 			if (ssh != null)
 				return uploadResults(ssh);
 		} catch (Exception e) {
 			if (ssh != null)
 				ssh.disconnect();
-			//throw e;
+//			throw e;
 		}
 		return null;
 	}
@@ -248,13 +249,13 @@ public class BenchmarkRunner extends Runner {
 	private void deployPts(SshClient ssh) throws RunScriptOnMachineException {
 
 		/* Upload PTS */
-		URL resource = this.getClass().getResource(File.separator + PTS_DIR_NAME + ".tar.gz");
-		File ptsPackage = new File(resource.getFile());
+		URL resource = this.getClass().getResource("/" + PTS_DIR_NAME +"-"+PTS_DIR_VERSION+ ".tar.gz");
+		File ptsPackage = new File(resource.getFile().replace("%20", " "));
 		ssh.put("/tmp/" + ptsPackage.getName(), new FilePayload(ptsPackage));
 
 		/* Upload pre-defined config */
-		resource = this.getClass().getResource(File.separator + PTS_CONFIG_DIR_NAME + ".tar.gz");
-		File ptsConfig = new File(resource.getFile());
+		resource = this.getClass().getResource("/" + PTS_CONFIG_DIR_NAME + ".tar.gz");
+		File ptsConfig = new File(resource.getFile().replace("%20", " "));
 		ssh.put("/tmp/" + ptsConfig.getName(), new FilePayload(ptsConfig));
 
 		/* Just to make sure the destination directories are there */

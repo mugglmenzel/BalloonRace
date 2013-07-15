@@ -44,6 +44,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -75,8 +76,7 @@ public class Benchmark implements IMetricsType, Serializable {
 	/* Extracted from a local installation */
 	private static final String OPENBENCHMARKING_CLIENT_GSID = "NNGKDG999";
 
-	private static final String TEST_PROFILE_DIR = File.separator + "test-profiles" + File.separator + "pts"
-	    + File.separator;
+	private static final String TEST_PROFILE_DIR = "/test-profiles/pts/";
 
 	/* TODO: Make these lists external */
 	/* Will not work, as we're having headless servers */
@@ -145,6 +145,7 @@ public class Benchmark implements IMetricsType, Serializable {
 		/* Set default selected value */
 		for (String option : options) {
 			List<String> values = valuesByOption.get(option);
+//			Logger.getLogger(Benchmark.class.getName()).info("Requesting Option: "+ option);
 			if (!values.isEmpty()) {
 				setSelectedValue(option, values.get(0));
 			}
@@ -236,7 +237,8 @@ public class Benchmark implements IMetricsType, Serializable {
 		SAXBuilder saxBuilder = new SAXBuilder();
 
 		URL testProfileResourceUrl = Benchmark.class.getResource(TEST_PROFILE_DIR);
-		File testProfileResourceDir = new File(testProfileResourceUrl.getFile());
+
+		File testProfileResourceDir = new File(testProfileResourceUrl.getFile().replace("%20", " "));
 
 		assert testProfileResourceDir.isDirectory();
 
@@ -244,9 +246,9 @@ public class Benchmark implements IMetricsType, Serializable {
 			if (testProfileDir.isDirectory()) {
 				try {
 					URL testProfileUrl =
-					    Benchmark.class.getResource(TEST_PROFILE_DIR + File.separator + testProfileDir.getName() + File.separator
+					    Benchmark.class.getResource(TEST_PROFILE_DIR + "/" + testProfileDir.getName() + "/"
 					        + "test-definition.xml");
-					File file = new File(testProfileUrl.getFile());
+					File file = new File(testProfileUrl.getFile().replace("%20", " "));
 					Document doc = saxBuilder.build(file);
 					Element rootElement = doc.getRootElement();
 

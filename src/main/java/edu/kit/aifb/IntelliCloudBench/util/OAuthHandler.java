@@ -123,8 +123,8 @@ public class OAuthHandler implements ParameterHandler {
 	}
 	private OAuthService getService(){
 
-		String apiKey = "353180287645.apps.googleusercontent.com";
-		String apiSecret = "5E3J7MH2j20E5EepfkA0FIe5";
+		String apiKey = "136391218568.apps.googleusercontent.com";
+		String apiSecret = "j8CW8Bpi1QR68cnnyAnS2mll";
 		
 		return  new ServiceBuilder().provider(GoogleApi20.class).apiKey(apiKey).apiSecret(apiSecret).scope(OAuthHandler.SCOPE).
 		        grantType(OAuthHandler.GRANT_TYPE).callback(callbackUrl).build();
